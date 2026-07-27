@@ -43,7 +43,32 @@
 
 AI API Key 只保存在门户配置存储中，页面脱敏展示，内部接口只给受信任服务读取。
 
-## 4. 部署命令
+## 4. 版本管理
+
+- 本地仓库：`C:\Users\12514\Documents\门户`
+- 默认分支：`main`
+- VPS 远端名：`vps`
+- VPS 裸仓库：`/root/git/brianhub-portal.git`
+- 远端地址：`ssh://root@192.236.235.229/root/git/brianhub-portal.git`
+- SSH key：`~/.ssh/cnstock_vps`
+
+当前规则：
+
+- `git push` 只做版本管理，不自动部署。
+- 发布到 `/root/apps/portal` 仍按本文部署命令执行。
+- 不提交 `/root/apps/portal/.env.production`、`/root/apps/portal/data`、用户配置、AI API 配置、日志、数据库或密钥文件。
+- 本地 `.gitignore` 必须排除依赖目录、运行数据、Codex 临时目录和历史备份文件。
+
+常用命令：
+
+```bash
+git status
+git add src public docs test
+git commit -m "描述本次修改"
+git push
+```
+
+## 5. 部署命令
 
 进入生产目录：
 
@@ -75,7 +100,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yml ps
 docker compose --env-file .env.production -f docker-compose.prod.yml logs --tail=120 portal
 ```
 
-## 5. 发布验证
+## 6. 发布验证
 
 至少验证：
 
@@ -89,7 +114,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yml logs --tail
 
 验证时不要在命令、日志或文档中输出真实密码、内部令牌或 AI API Key。
 
-## 6. 回滚
+## 7. 回滚
 
 如果门户发布后异常：
 
@@ -99,7 +124,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yml logs --tail
 4. 重新执行 Compose 构建启动。
 5. 复测登录、文档中心、AI 配置和 gateway 认证检查。
 
-## 7. 数据保护
+## 8. 数据保护
 
 不得覆盖或删除：
 

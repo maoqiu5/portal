@@ -36,6 +36,8 @@ https://brianhub.net/?tab=docs&project=portal&doc=docs%2FNEW_PROJECT_DOCUMENTATI
 8. 上线前必须写清部署、验证、回滚和健康检查方式。
 9. 不得在代码、文档、日志、页面或接口返回中泄露真实密码、API Key、Cookie、内部令牌或私钥。
 10. 上线后必须能在 BrianHub 门户文档中心看到项目文档。
+11. 项目默认建立本地 Git 仓库，并推送到 VPS 裸仓库 `/root/git/<项目名>.git`；远端名使用 `vps`，`git push` 只做版本管理，不自动部署，除非项目文档另有明确说明。
+12. `.gitignore` 必须排除生产环境文件、数据库、依赖目录、运行数据、日志、备份、密钥目录和 Codex 临时目录；允许提交不含真实值的 `.env.production.example`。
 
 执行方式：
 1. 先读取上述规范文档。
@@ -43,6 +45,7 @@ https://brianhub.net/?tab=docs&project=portal&doc=docs%2FNEW_PROJECT_DOCUMENTATI
 3. 先形成简短设计和实施计划。
 4. 再按测试、实现、验证、部署、文档更新的顺序推进。
 5. 如果发现现有项目规则和 BrianHub 标准冲突，先列出冲突点和建议，不要盲目覆盖线上配置。
+6. 如果项目尚未纳入 Git，先建立本地 Git 仓库和 VPS 裸仓库远端，再提交正式源码、测试和文档。
 ```
 
 ## 给用户的最短版本
@@ -50,7 +53,7 @@ https://brianhub.net/?tab=docs&project=portal&doc=docs%2FNEW_PROJECT_DOCUMENTATI
 如果只想发一句话给新项目，可以发：
 
 ```text
-这是 BrianHub 新项目。请先连接 VPS 读取 /root/apps/portal/docs/BRIANHUB_DEVELOPMENT_STANDARD.md 和 /root/apps/portal/docs/NEW_PROJECT_DOCUMENTATION_REQUIREMENTS.md，再按规范开发、部署和补齐 docs/README.md、docs/PRD.md、docs/DEPLOYMENT.md、docs/CHANGELOG.md。
+这是 BrianHub 新项目。请先连接 VPS 读取 /root/apps/portal/docs/BRIANHUB_DEVELOPMENT_STANDARD.md 和 /root/apps/portal/docs/NEW_PROJECT_DOCUMENTATION_REQUIREMENTS.md，再按规范开发、部署、建立本地 Git + VPS 裸仓库远端，并补齐 docs/README.md、docs/PRD.md、docs/DEPLOYMENT.md、docs/CHANGELOG.md。
 ```
 
 ## 新项目第一次检查清单
@@ -63,6 +66,8 @@ https://brianhub.net/?tab=docs&project=portal&doc=docs%2FNEW_PROJECT_DOCUMENTATI
 - [ ] 已确认是否接入门户 SSO。
 - [ ] 已确认是否使用门户 AI 配置。
 - [ ] 已确认数据目录、备份目录和日志目录。
+- [ ] 已确认本地 Git 仓库和 VPS 裸仓库路径。
+- [ ] 已确认 `.gitignore` 不会提交生产环境文件、数据库、依赖、运行数据或密钥。
 - [ ] 已创建标准四件套文档。
 - [ ] 已确认没有把真实密钥写入文档。
 

@@ -94,6 +94,53 @@
 - `secrets/`
 - 以 `._` 开头的文件
 
+## 版本管理规则
+
+BrianHub 项目默认使用“本地 Git 仓库 + VPS 裸仓库远端”的版本管理方式。GitHub 可作为后续备份或协作渠道，但在连接 GitHub 经常超时的情况下，不作为上线和版本追踪的必需链路。
+
+标准结构：
+
+```text
+本地项目目录 -> git push -> /root/git/<project>.git
+VPS 生产目录：/root/apps/<project>
+```
+
+要求：
+- 本地项目必须是 Git 仓库，默认分支为 `main`。
+- VPS 裸仓库统一放在 `/root/git/<project>.git`。
+- 本地远端名统一使用 `vps`。
+- `git push` 只做版本管理，不自动部署，除非该项目文档明确写了自动部署 hook。
+- 生产目录 `/root/apps/<project>` 仍按项目部署文档发布和重启。
+- 每次正式修改应先提交 Git，再按部署流程同步或上线。
+
+每个项目必须配置 `.gitignore`，至少排除：
+- `node_modules/`
+- `.pnpm-store/`
+- `.codex/`
+- `.codex-*/`
+- `.work/`
+- `data/`
+- `logs/`
+- `runtime/`
+- `backups/`
+- `secrets/`
+- `.env`
+- `.env.*`
+- `*.sqlite`
+- `*.sqlite-shm`
+- `*.sqlite-wal`
+- `*.bak`
+- `*.backup-*`
+- `*.pre-*`
+
+允许提交配置样例，例如 `.env.production.example`，但不得提交 `.env.production` 或任何真实密钥文件。
+
+初始化项目时必须验证：
+- 本地 `git status` 干净。
+- 本地 `main` 跟踪 `vps/main`。
+- VPS 裸仓库能看到最新 commit。
+- 远端仓库树中没有生产环境文件、数据库、依赖目录、运行数据、密钥目录或 Codex 临时目录。
+
 ## 登录和 SSO 规则
 
 所有接入 BrianHub 的业务项目默认使用门户统一登录：

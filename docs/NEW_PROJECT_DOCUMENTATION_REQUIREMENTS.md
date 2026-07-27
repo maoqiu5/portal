@@ -72,6 +72,8 @@ docs/
 - 回滚方式。
 - 健康检查方式。
 - 网关路由要求。
+- 版本管理方式：本地 Git 仓库、VPS 裸仓库路径、远端名和是否自动部署。
+- `.gitignore` 保护范围：生产环境文件、数据库、依赖目录、运行数据、日志、备份、密钥和 Codex 临时目录。
 
 ### `docs/CHANGELOG.md`
 
@@ -148,6 +150,9 @@ docs/
 - 是否需要健康检查 URL。
 - 是否需要从门户读取 AI 配置。
 - 是否完全移除项目内独立登录。
+- VPS 裸仓库路径，例如 `/root/git/<project>.git`。
+- 本地 Git 远端名，默认 `vps`。
+- `git push` 是否只做版本管理；如有自动部署 hook，必须写清触发条件和回滚方式。
 
 ## SSO 要求
 
@@ -179,6 +184,29 @@ docs/
 - 备份目录。
 - 哪些目录不得提交 Git。
 - 哪些目录不得进入门户文档中心。
+
+默认不得提交 Git 的目录和文件：
+
+- `node_modules/`
+- `.pnpm-store/`
+- `.codex/`
+- `.codex-*/`
+- `.work/`
+- `data/`
+- `logs/`
+- `runtime/`
+- `backups/`
+- `secrets/`
+- `.env`
+- `.env.*`
+- `*.sqlite`
+- `*.sqlite-shm`
+- `*.sqlite-wal`
+- `*.bak`
+- `*.backup-*`
+- `*.pre-*`
+
+允许提交 `.env.production.example` 等不含真实值的配置样例。
 
 默认不进入文档中心的目录：
 
