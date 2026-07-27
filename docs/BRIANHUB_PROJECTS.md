@@ -7,8 +7,11 @@
 | 门户 | `/` | `/root/apps/portal` | `/root/apps/portal/docs/README.md` |
 | 美股 | `/usstock` | `/root/apps/us-stock-cockpit` | `/root/apps/us-stock-cockpit/docs/README.md` |
 | A 股 | `/cnstock` | `/root/apps/cnstock` | `/root/apps/cnstock/docs/README.md` |
+| 研擎 | `/yanqing` | `/root/apps/yanqing` | `/root/apps/yanqing/docs/README.md` |
 | 邮件工作台 | `/maildesk` | `/root/apps/maildesk` | `/root/apps/maildesk/docs/README.md` |
 | GPS 工具 | `/gps` | `/root/apps/gps` | `/root/apps/gps/docs/README.md` |
+| 境外运价 | `/rates` | `/root/apps/rates` | `/root/apps/rates/docs/README.md` |
+| 聚合学习工作台 | `/learndesk` | `/root/apps/learndesk` | `/root/apps/learndesk/docs/README.md` |
 | 翻译助手 | `/translator` | `/root/apps/translator` | `/root/apps/translator/docs/README.md` |
 | NAS 管理 | `/nas` | `/root/apps/nas` | `/root/apps/nas/docs/README.md` |
 | BrianHub 网关 | 基础设施 | `/root/apps/brianhub-gateway` | `/root/apps/brianhub-gateway/docs/README.md` |

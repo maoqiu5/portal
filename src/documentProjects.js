@@ -6,6 +6,7 @@ const documentProjects = [
   { id: 'portal', name: '门户', root: path.join(docsRoot, 'portal') },
   { id: 'usstock', name: '美股', root: path.join(docsRoot, 'us-stock-cockpit') },
   { id: 'cnstock', name: 'A 股', root: path.join(docsRoot, 'cnstock') },
+  { id: 'yanqing', name: '研擎', root: path.join(docsRoot, 'yanqing') },
   { id: 'maildesk', name: '邮件工作台', root: path.join(docsRoot, 'maildesk') },
   { id: 'gps', name: 'GPS 工具', root: path.join(docsRoot, 'gps') },
   { id: 'rates', name: '境外运价', root: path.join(docsRoot, 'rates') },

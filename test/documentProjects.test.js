@@ -8,3 +8,10 @@ test('document center includes Home Assistant project docs', () => {
   assert.equal(project.name, '\u667a\u80fd\u5bb6\u5c45\u63a7\u5236\u53f0');
   assert.match(project.root, /homeassistant$/);
 });
+
+test('document center includes Yanqing project docs', () => {
+  const project = documentProjects.find((item) => item.id === 'yanqing');
+  assert.ok(project);
+  assert.equal(project.name, '研擎');
+  assert.match(project.root, /yanqing$/);
+});
