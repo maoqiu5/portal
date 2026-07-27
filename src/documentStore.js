@@ -70,6 +70,7 @@ function categoryFor(relativePath) {
   const parts = relativePath.split('/');
   if (parts.length === 1) return '入口';
   const first = parts[0].toLowerCase();
+  if (first === '.engramory-memory') return '长期记忆';
   if (first === 'docs' && parts.length === 2) return '核心文档';
   if (first === 'docs') return parts[1];
   return first;
@@ -84,6 +85,7 @@ function documentSortKey(relativePath) {
     ['docs/CHANGELOG.md', 4],
     ['docs/HANDOFF.md', 5]
   ]);
+  if (relativePath.startsWith('.engramory-memory/')) return `99:${relativePath}`;
   return `${priority.get(relativePath) ?? 9}:${relativePath}`;
 }
 

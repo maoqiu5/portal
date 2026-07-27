@@ -70,3 +70,27 @@ test('document index uses cache until ttl expires', () => {
   now += 60_001;
   assert.equal(store.listDocuments().projects[0].documents[0].title, '第二版');
 });
+
+test('document index includes engramory markdown as long-term memory', () => {
+  const project = createProject({
+    'docs/README.md': '# 文档入口\n',
+    '.engramory-memory/MEMORY.md': '# 项目记忆\n\n长期保存的项目上下文。\n',
+    '.engramory-memory/project-overview.md': '# 项目概览记忆\n',
+    '.engramory-memory/raw.txt': '不是 Markdown'
+  });
+  const store = createDocumentStore({ projects: [project] });
+
+  const docs = store.listDocuments().projects[0].documents;
+  const memoryDocs = docs.filter((doc) => doc.path.startsWith('.engramory-memory/'));
+
+  assert.deepEqual(memoryDocs.map((doc) => doc.path), [
+    '.engramory-memory/MEMORY.md',
+    '.engramory-memory/project-overview.md'
+  ]);
+  assert.deepEqual([...new Set(memoryDocs.map((doc) => doc.category))], ['长期记忆']);
+
+  const memory = store.getDocument('demo', '.engramory-memory/MEMORY.md');
+  assert.equal(memory.document.title, '项目记忆');
+  assert.equal(memory.document.category, '长期记忆');
+  assert.match(memory.content, /长期保存的项目上下文/);
+});

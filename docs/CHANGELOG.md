@@ -2,6 +2,22 @@
 
 本文件记录门户的登录、用户管理、AI 配置、文档中心、项目导航和部署变更。
 
+## v2026.07.27-4 - 文档中心展示 Engramory 长期记忆
+
+- 类型：功能 / 文档中心
+- 范围：文档索引 / 文档浏览 / 项目长期记忆
+- 内容：
+  - 文档中心纳入各项目 `.engramory-memory/*.md` 文件。
+  - Engramory 文档统一显示为“长期记忆”分类，排在正式项目文档之后。
+  - 继续只展示 Markdown 文件，不把 Engramory 作为文档审计必需项。
+  - 保持路径穿越、数据目录、日志目录、密钥目录和依赖目录的读取限制。
+- 验证：
+  - 已按 TDD 增加 `documentStore` 和页面回归测试。
+  - 已运行门户完整本地测试：`projects`、`documentProjects`、`auth`、`configStore`、`documentStore`、`server`。
+  - 待完成线上同步和验证。
+- 注意：
+  - 本次不修改 Engramory 内容、不写入 Codex 原生 memories、不改变业务项目登录或部署规则。
+
 ## v2026.07.27-3 - BrianHub Git 版本管理规范
 
 - 类型：文档 / 运维

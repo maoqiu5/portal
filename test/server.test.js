@@ -12,9 +12,11 @@ function makeDocsProject() {
   fs.mkdirSync(path.join(root, 'node_modules', 'pkg'), { recursive: true });
   fs.mkdirSync(path.join(root, 'report-source'), { recursive: true });
   fs.mkdirSync(path.join(root, 'secrets'), { recursive: true });
+  fs.mkdirSync(path.join(root, '.engramory-memory'), { recursive: true });
   fs.writeFileSync(path.join(root, 'README.md'), '# 项目入口\n\n入口内容\n');
   fs.writeFileSync(path.join(root, 'docs', 'PRD.md'), '# 产品说明\n\n## 范围\n\nPRD 内容\n');
   fs.writeFileSync(path.join(root, 'docs', 'reports', 'RUN.md'), '# 运行报告\n\n报告内容\n');
+  fs.writeFileSync(path.join(root, '.engramory-memory', 'MEMORY.md'), '# 长期记忆\n\n项目长期上下文\n');
   fs.writeFileSync(path.join(root, 'node_modules', 'pkg', 'README.md'), '# 噪声文档\n');
   fs.writeFileSync(path.join(root, 'report-source', 'daily.md'), '# 日报产物\n');
   fs.writeFileSync(path.join(root, 'secrets', 'README.md'), '# 私有说明\n');
@@ -196,7 +198,8 @@ test('GET /docs/index returns formal docs and excludes dependency docs', async (
   const res = await agent.get('/docs/index');
   assert.equal(res.status, 200);
   assert.equal(res.body.projects[0].name, '演示项目');
-  assert.deepEqual(res.body.projects[0].documents.map((doc) => doc.path), ['README.md', 'docs/PRD.md', 'docs/reports/RUN.md']);
+  assert.deepEqual(res.body.projects[0].documents.map((doc) => doc.path), ['README.md', 'docs/PRD.md', 'docs/reports/RUN.md', '.engramory-memory/MEMORY.md']);
+  assert.equal(res.body.projects[0].documents.at(-1).category, '长期记忆');
   assert.doesNotMatch(JSON.stringify(res.body), /node_modules/);
   assert.doesNotMatch(JSON.stringify(res.body), /report-source/);
   assert.doesNotMatch(JSON.stringify(res.body), /secrets/);
@@ -236,7 +239,9 @@ test('GET /?tab=docs renders optimized document center and selected markdown', a
   assert.match(index.text, /doc-more-docs/);
   assert.match(index.text, /核心文档/);
   assert.match(index.text, /更多文档/);
-  assert.match(index.text, /文档 3 份/);
+  assert.match(index.text, /文档 4 份/);
+  assert.match(index.text, /长期记忆/);
+  assert.match(index.text, /\.engramory-memory\/MEMORY\.md/);
   assert.match(index.text, /缺少 3 项/);
   assert.match(index.text, /演示项目/);
   assert.match(index.text, /产品说明/);
