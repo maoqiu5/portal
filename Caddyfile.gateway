@@ -1,0 +1,172 @@
+{
+	email {$TLS_EMAIL}
+}
+
+{$APP_DOMAIN}, www.brianhub.net {
+	encode zstd gzip
+
+	handle / {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /login {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /logout {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /users* {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /ai-config* {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /health/projects {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /docs* {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /internal/ai-config {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /assets/* {
+		reverse_proxy portal_frontend:3000
+	}
+
+	redir /gps /gps/ 308
+
+	handle /gps/api/health {
+		rewrite * /health
+		reverse_proxy 172.19.0.1:8015
+	}
+
+	handle /gps/api/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check
+		}
+		uri strip_prefix /gps
+		reverse_proxy 172.19.0.1:8015
+	}
+
+	route /gps/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check?redirect=1
+		}
+		uri strip_prefix /gps
+		root * /srv/gps
+		try_files {path} /index.html
+		file_server
+	}
+
+	redir /rates /rates/ 308
+
+	handle /rates/api/health {
+		rewrite * /health
+		reverse_proxy 172.19.0.1:8025
+	}
+
+	handle /rates/api/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check
+		}
+		uri strip_prefix /rates
+		reverse_proxy 172.19.0.1:8025
+	}
+
+	route /rates/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check?redirect=1
+		}
+		uri strip_prefix /rates
+		root * /srv/rates
+		try_files {path} /index.html
+		file_server
+	}
+
+	route /usstock/api/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check
+		}
+		uri strip_prefix /usstock/api
+		reverse_proxy usstock_backend:8000 {
+			header_up X-BrianHub-SSO "1"
+		}
+	}
+
+	route /usstock* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check?redirect=1
+		}
+		reverse_proxy usstock_frontend:3000
+	}
+
+	route /maildesk/api/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check
+		}
+		uri strip_prefix /maildesk/api
+		reverse_proxy maildesk_backend:8000 {
+			header_up X-App-Password {$MAILDESK_APP_PASSWORD}
+		}
+	}
+
+	redir /maildesk/wps-browser /maildesk/wps-browser/vnc.html?autoconnect=1&resize=scale 302
+
+	route /maildesk/wps-browser/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check?redirect=1
+		}
+		uri strip_prefix /maildesk/wps-browser
+		reverse_proxy 172.19.0.1:6080
+	}
+
+	route /maildesk* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check?redirect=1
+		}
+		reverse_proxy maildesk_frontend:3000
+	}
+
+	redir /translator /translator/ 308
+
+	route /translator/api/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check
+		}
+		uri strip_prefix /translator
+		reverse_proxy translator_app:3000
+	}
+
+	route /translator* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check?redirect=1
+		}
+		uri strip_prefix /translator
+		reverse_proxy translator_app:3000
+	}
+
+	route /cnstock/api/* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check
+		}
+		uri strip_prefix /cnstock/api
+		reverse_proxy cnstock_backend:8000 {
+			header_up X-BrianHub-SSO "1"
+		}
+	}
+
+	route /cnstock* {
+		forward_auth portal_frontend:3000 {
+			uri /auth/check?redirect=1
+		}
+		reverse_proxy cnstock_frontend:3000
+	}
+}

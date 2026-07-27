@@ -1,0 +1,49 @@
+# Dependencies and package-manager caches
+node_modules/
+.pnpm-store/
+
+# Runtime data and local-only state
+data/
+logs/
+runtime/
+backups/
+secrets/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Environment and secrets
+.env
+.env.*
+!.env.production.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Codex/local working artifacts
+.codex/
+.codex-*/
+.work/
+.worktrees/
+worktrees/
+
+# Build and cache output
+dist/
+build/
+.next/
+.cache/
+coverage/
+
+# Historical one-off backups copied from production
+*.bak
+*.bak-*
+*.backup-*
+*.pre-*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+._*

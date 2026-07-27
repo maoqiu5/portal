@@ -1,0 +1,25 @@
+name: brianhub-portal
+
+services:
+  portal:
+    build:
+      context: .
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      PORTAL_CONFIG_PATH: /app/data/portal-config.json
+    volumes:
+      - ./data:/app/data
+      - /root/apps:/host/apps:ro
+    networks:
+      brianhub_edge:
+        aliases:
+          - portal_frontend
+
+networks:
+  brianhub_edge:
+    name: brianhub_edge
+    external: true
