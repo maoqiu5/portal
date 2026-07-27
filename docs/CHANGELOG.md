@@ -15,7 +15,8 @@
 - 验证：
   - 已按 TDD 增加 `documentStore` 和页面回归测试。
   - 已运行门户完整本地测试：`projects`、`documentProjects`、`auth`、`configStore`、`documentStore`、`server`。
-  - 待完成线上同步和验证。
+  - 已完成线上同步、容器重建和 `/docs/index` 验证：可看到 `.engramory-memory`、“长期记忆”和 `yanqing`。
+  - 已验证线上 `/docs/audit` 返回 200，所有文档项目状态为 `ok`。
 - 注意：
   - 本次不修改 Engramory 内容、不写入 Codex 原生 memories、不改变业务项目登录或部署规则。
 

@@ -87,14 +87,14 @@ Expected: 全部通过。
 - Consumes: VPS `/root/apps/portal`
 - Produces: 线上 `https://brianhub.net/?tab=docs` 可以查看各项目长期记忆
 
-- [ ] **Step 1: Commit and push**
+- [x] **Step 1: Commit and push**
 
 提交本地 Git，并推送到 VPS 裸仓库。
 
-- [ ] **Step 2: Sync production files**
+- [x] **Step 2: Sync production files**
 
 同步改动到 `/root/apps/portal`，运行线上测试并重建门户容器。
 
-- [ ] **Step 3: Verify online**
+- [x] **Step 3: Verify online**
 
 登录后检查 `/docs/index` 或页面内容包含 `.engramory-memory` 和 `长期记忆`。
