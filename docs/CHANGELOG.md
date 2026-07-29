@@ -2,6 +2,18 @@
 
 本文件记录门户的登录、用户管理、AI 配置、文档中心、项目导航和部署变更。
 
+## v2026.07.28-1 - 同步 Git 归档后排除内部计划文档
+
+- 类型：修复 / 文档中心 / 部署同步
+- 范围：文档索引 / 文档审计
+- 内容：
+  - 文档中心扫描时排除 `docs/superpowers/` 内部实施计划目录。
+  - 避免本地 Git 归档完整同步到 VPS 后，内部计划文档进入门户正式文档中心。
+  - 保留 `docs/README.md`、`docs/PRD.md`、`docs/DEPLOYMENT.md`、`docs/CHANGELOG.md` 和 Engramory 长期记忆展示。
+- 验证：
+  - 已按 TDD 增加 `documentStore` 回归测试。
+  - 已运行 `documentStore` 和 `server` 测试。
+
 ## v2026.07.27-4 - 文档中心展示 Engramory 长期记忆
 
 - 类型：功能 / 文档中心

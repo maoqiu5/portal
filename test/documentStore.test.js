@@ -23,6 +23,7 @@ test('document index hides process files and prefers docs changelog', () => {
     'progress.md': '# Progress\n',
     'task_plan.md': '# Task Plan\n',
     'findings.md': '# Findings\n',
+    'docs/superpowers/plans/internal.md': '# Internal Plan\n\nOPENAI_API_KEY=sk-internal-example\n',
     'docs/CHANGELOG.md': '# Docs Changelog\n',
     'docs/PRD.md': '# Product Doc\n'
   });
@@ -32,7 +33,9 @@ test('document index hides process files and prefers docs changelog', () => {
   assert.doesNotMatch(paths.join('\n'), /progress\.md/);
   assert.doesNotMatch(paths.join('\n'), /task_plan\.md/);
   assert.doesNotMatch(paths.join('\n'), /findings\.md/);
+  assert.doesNotMatch(paths.join('\n'), /docs\/superpowers/);
   assert.doesNotMatch(paths.join('\n'), /^CHANGELOG\.md$/m);
+  assert.deepEqual(store.auditDocuments().projects[0].risks, []);
 });
 
 test('document audit reports missing required docs without leaking secret values', () => {

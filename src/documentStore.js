@@ -48,6 +48,7 @@ function normalizeRelativePath(value) {
 
 function shouldSkip(relativePath) {
   const normalized = relativePath.replaceAll('\\', '/');
+  if (normalized.toLowerCase().startsWith('docs/superpowers/')) return true;
   if (EXCLUDED_ROOT_FILES.has(normalized.toLowerCase())) return true;
   return normalized.split('/').some((part) => EXCLUDED_PARTS.has(part) || part.startsWith('._'));
 }
