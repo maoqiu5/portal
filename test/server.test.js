@@ -46,7 +46,7 @@ test('GET / shows Chinese login page with a background image layer', async () =>
   const res = await request(app()).get('/');
   assert.equal(res.status, 200);
   assert.match(res.text, /登录 BrianHub/);
-  assert.match(res.text, /统一进入美股、A 股、邮件、GPS 和翻译工具/);
+  assert.doesNotMatch(res.text, /统一进入美股、A 股、邮件、GPS 和翻译工具/);
   assert.match(res.text, /login-background/);
   assert.doesNotMatch(res.text, /Portal sign in/);
   assert.doesNotMatch(res.text, /Username/);

@@ -102,7 +102,6 @@ function renderLoginPage({ error = '', returnTo = '/' }) {
       <section class="login-panel">
         <p class="eyebrow">BrianHub</p>
         <h1>登录 BrianHub</h1>
-        <p class="login-subtitle">统一进入美股、A 股、邮件、GPS 和翻译工具。</p>
         ${errorHtml}
         <form method="post" action="/login" class="login-form">
           <input type="hidden" name="returnTo" value="${escapeHtml(returnTo)}">
