@@ -36,14 +36,32 @@ test('config store manages users without exposing password hashes in list', () =
     defaultPassword: 'secret'
   });
 
-  store.createUser({ username: 'alice', password: 'pass1234', role: 'user' });
+  store.createUser({ username: 'alice', password: 'pass1234', role: 'user', allowedProjects: ['rail-cost'] });
   store.setUserStatus('alice', 'disabled');
   assert.equal(store.verifyUser('alice', 'pass1234'), null);
 
   store.resetPassword('alice', 'nextpass');
   store.setUserStatus('alice', 'active');
-  assert.equal(store.verifyUser('alice', 'nextpass')?.username, 'alice');
-  assert.equal(store.listUsers().find((user) => user.username === 'alice').passwordHash, undefined);
+  const verified = store.verifyUser('alice', 'nextpass');
+  assert.equal(verified?.username, 'alice');
+  assert.deepEqual(verified.allowedProjects, ['rail-cost']);
+  const listed = store.listUsers().find((user) => user.username === 'alice');
+  assert.equal(listed.passwordHash, undefined);
+  assert.deepEqual(listed.allowedProjects, ['rail-cost']);
+});
+
+test('config store updates user project permissions', () => {
+  const store = createConfigStore({
+    filePath: tempConfigPath(),
+    defaultUsername: 'brian',
+    defaultPassword: 'secret'
+  });
+
+  store.createUser({ username: 'alice', password: 'pass1234', role: 'user', allowedProjects: ['rail-cost', 'nas'] });
+  store.setUserProjects('alice', ['rail-cost', 'unknown', 'rail-cost']);
+
+  assert.deepEqual(store.verifyUser('alice', 'pass1234').allowedProjects, ['rail-cost']);
+  assert.deepEqual(store.listUsers().find((user) => user.username === 'alice').allowedProjects, ['rail-cost']);
 });
 
 test('config store saves ai config while preserving existing api key', () => {

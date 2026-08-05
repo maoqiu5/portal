@@ -10,6 +10,7 @@ const documentProjects = [
   { id: 'maildesk', name: '邮件工作台', root: path.join(docsRoot, 'maildesk') },
   { id: 'gps', name: 'GPS 工具', root: path.join(docsRoot, 'gps') },
   { id: 'rates', name: '境外运价', root: path.join(docsRoot, 'rates') },
+  { id: 'rail-cost', name: '境外段铁路成本', root: path.join(docsRoot, 'rail-cost') },
   { id: 'translator', name: '翻译助手', root: path.join(docsRoot, 'translator') },
   { id: 'learndesk', name: '聚合学习工作台', root: path.join(docsRoot, 'learndesk') },
   { id: 'nas', name: 'NAS 管理', root: path.join(docsRoot, 'nas') },

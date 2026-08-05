@@ -94,12 +94,52 @@ test('GET / shows Chinese portal with valid session and document tab', async () 
 test('POST /users/create creates a user and redirects with success popup message', async () => {
   const instance = app();
   const agent = await loginAgent(instance);
-  const createRes = await agent.post('/users/create').type('form').send({ username: 'alice', password: 'pass1234', role: 'user' });
+  const createRes = await agent.post('/users/create').type('form').send({ username: 'alice', password: 'pass1234', role: 'user', allowedProjects: ['rail-cost'] });
   assert.equal(createRes.status, 302);
   assert.equal(createRes.headers.location, '/?tab=users&message=%E7%94%A8%E6%88%B7%E5%B7%B2%E6%96%B0%E5%A2%9E');
 
   const loginRes = await request(instance).post('/login').type('form').send({ username: 'alice', password: 'pass1234', returnTo: '/' });
   assert.equal(loginRes.status, 302);
+});
+
+test('regular user sees only authorized project modules and no management tabs', async () => {
+  const instance = app();
+  const admin = await loginAgent(instance);
+  await admin.post('/users/create').type('form').send({ username: 'cindy', password: 'pass1234', role: 'user', allowedProjects: ['rail-cost'] });
+
+  const cindy = request.agent(instance);
+  await cindy.post('/login').type('form').send({ username: 'cindy', password: 'pass1234', returnTo: '/' });
+  const home = await cindy.get('/');
+
+  assert.equal(home.status, 200);
+  assert.match(home.text, /cindy · 普通用户/);
+  assert.match(home.text, /境外段铁路成本/);
+  assert.match(home.text, /href="\/rail-cost"/);
+  assert.doesNotMatch(home.text, /美股/);
+  assert.doesNotMatch(home.text, /邮件工作台/);
+  assert.doesNotMatch(home.text, /用户管理/);
+  assert.doesNotMatch(home.text, /文档中心/);
+
+  assert.equal((await cindy.get('/docs/index')).status, 403);
+  assert.equal((await cindy.get('/?tab=users')).status, 200);
+  assert.doesNotMatch((await cindy.get('/?tab=users')).text, /用户管理/);
+});
+
+test('admin can update user project permissions from user management', async () => {
+  const instance = app();
+  const admin = await loginAgent(instance);
+  await admin.post('/users/create').type('form').send({ username: 'cindy', password: 'pass1234', role: 'user', allowedProjects: ['rail-cost'] });
+
+  const updateRes = await admin.post('/users/cindy/projects').type('form').send({ allowedProjects: ['rail-cost', 'nas'] });
+  assert.equal(updateRes.status, 302);
+  assert.equal(updateRes.headers.location, '/?tab=users&message=%E6%A8%A1%E5%9D%97%E6%9D%83%E9%99%90%E5%B7%B2%E6%9B%B4%E6%96%B0');
+
+  const cindy = request.agent(instance);
+  await cindy.post('/login').type('form').send({ username: 'cindy', password: 'pass1234', returnTo: '/' });
+  const home = await cindy.get('/');
+  assert.match(home.text, /境外段铁路成本/);
+  assert.match(home.text, /NAS 管理/);
+  assert.doesNotMatch(home.text, /美股/);
 });
 
 test('POST /users/:username/status disables a user and password reset changes login password', async () => {

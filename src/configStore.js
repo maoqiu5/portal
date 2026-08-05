@@ -11,6 +11,20 @@ const DEFAULT_AI_CONFIG = {
   analysisLimit: 50
 };
 
+const DEFAULT_PROJECT_IDS = [
+  'usstock',
+  'cnstock',
+  'yanqing',
+  'maildesk',
+  'gps',
+  'rates',
+  'rail-cost',
+  'learndesk',
+  'nas',
+  'homeassistant',
+  'translator'
+];
+
 function normalizeUsername(username) {
   return String(username || '').trim().toLowerCase();
 }
@@ -21,6 +35,17 @@ function normalizeRole(role) {
 
 function normalizeStatus(status) {
   return status === 'disabled' ? 'disabled' : 'active';
+}
+
+function createProjectNormalizer(projectIds = DEFAULT_PROJECT_IDS) {
+  const allowedIds = new Set(projectIds);
+  return function normalizeProjectIds(value) {
+    const rawItems = Array.isArray(value) ? value : value ? [value] : [];
+    const seen = new Set();
+    return rawItems
+      .map((item) => String(item || '').trim())
+      .filter((item) => allowedIds.has(item) && !seen.has(item) && seen.add(item));
+  };
 }
 
 function nowIso() {
@@ -53,6 +78,7 @@ function createDefaultConfig(defaultUsername, defaultPassword) {
         passwordHash: hashPassword(defaultPassword),
         role: 'admin',
         status: 'active',
+        allowedProjects: [],
         createdAt: timestamp,
         updatedAt: timestamp
       }
@@ -71,6 +97,7 @@ function sanitizeConfig(config, defaults) {
       passwordHash: String(user.passwordHash || ''),
       role: normalizeRole(user.role),
       status: normalizeStatus(user.status),
+      allowedProjects: user.allowedProjects,
       createdAt: user.createdAt || nowIso(),
       updatedAt: user.updatedAt || nowIso()
     }))
@@ -97,6 +124,7 @@ function createConfigStore(options = {}) {
     defaultUsername: options.defaultUsername || process.env.PORTAL_USERNAME,
     defaultPassword: options.defaultPassword || process.env.PORTAL_PASSWORD
   };
+  const normalizeProjectIds = createProjectNormalizer(options.projectIds);
 
   function ensureConfig() {
     if (!fs.existsSync(filePath)) {
@@ -106,6 +134,10 @@ function createConfigStore(options = {}) {
     }
     const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     const config = sanitizeConfig(raw, defaults);
+    config.users = config.users.map((user) => ({
+      ...user,
+      allowedProjects: normalizeProjectIds(user.allowedProjects)
+    }));
     writeConfig(config);
     return config;
   }
@@ -127,19 +159,30 @@ function createConfigStore(options = {}) {
     return config;
   }
 
+  function publicUser(user) {
+    const { passwordHash, ...safeUser } = user;
+    return { ...safeUser, allowedProjects: normalizeProjectIds(user.allowedProjects) };
+  }
+
   function listUsers() {
-    return readConfig().users.map(({ passwordHash, ...user }) => user);
+    return readConfig().users.map(publicUser);
+  }
+
+  function getUser(username) {
+    const normalized = normalizeUsername(username);
+    const user = readConfig().users.find((item) => item.username === normalized);
+    if (!user || user.status !== 'active') return null;
+    return publicUser(user);
   }
 
   function verifyUser(username, password) {
     const normalized = normalizeUsername(username);
     const user = readConfig().users.find((item) => item.username === normalized);
     if (!user || user.status !== 'active' || !verifyPasswordHash(password, user.passwordHash)) return null;
-    const { passwordHash, ...publicUser } = user;
-    return publicUser;
+    return publicUser(user);
   }
 
-  function createUser({ username, password, role = 'user' }) {
+  function createUser({ username, password, role = 'user', allowedProjects = [] }) {
     const normalized = normalizeUsername(username);
     if (!/^[a-z0-9._-]{3,40}$/.test(normalized)) throw new Error('Invalid username');
     if (!password || password.length < 6) throw new Error('Password must be at least 6 characters');
@@ -152,13 +195,13 @@ function createConfigStore(options = {}) {
         passwordHash: hashPassword(password),
         role: normalizeRole(role),
         status: 'active',
+        allowedProjects: normalizeProjectIds(allowedProjects),
         createdAt: timestamp,
         updatedAt: timestamp
       };
       config.users.push(created);
     });
-    const { passwordHash, ...publicUser } = created;
-    return publicUser;
+    return publicUser(created);
   }
 
   function setUserStatus(username, status) {
@@ -178,6 +221,16 @@ function createConfigStore(options = {}) {
       const user = config.users.find((item) => item.username === normalized);
       if (!user) throw new Error('User not found');
       user.passwordHash = hashPassword(password);
+      user.updatedAt = nowIso();
+    });
+  }
+
+  function setUserProjects(username, allowedProjects) {
+    const normalized = normalizeUsername(username);
+    updateConfig((config) => {
+      const user = config.users.find((item) => item.username === normalized);
+      if (!user) throw new Error('User not found');
+      user.allowedProjects = normalizeProjectIds(allowedProjects);
       user.updatedAt = nowIso();
     });
   }
@@ -217,10 +270,12 @@ function createConfigStore(options = {}) {
   return {
     readConfig,
     listUsers,
+    getUser,
     verifyUser,
     createUser,
     setUserStatus,
     resetPassword,
+    setUserProjects,
     getAiConfigInternal,
     getAiConfigPublic,
     saveAiConfig

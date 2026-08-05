@@ -48,7 +48,8 @@ function createApp(config = {}) {
   const configStore = config.configStore || createConfigStore({
     filePath: config.configPath,
     defaultUsername: portalUsername,
-    defaultPassword: portalPassword
+    defaultPassword: portalPassword,
+    projectIds: appProjects.map((project) => project.id)
   });
 
   if (!portalUsername || !portalPassword || !sessionSecret) {
@@ -64,7 +65,34 @@ function createApp(config = {}) {
   function currentUser(req) {
     const token = req.cookies[COOKIE_NAME];
     const session = verifySessionToken(token, sessionSecret, maxAgeMs);
-    return session && session.username ? session : null;
+    if (!session || !session.username) return null;
+    return configStore.getUser(session.username);
+  }
+
+  function isAdmin(user) {
+    return user?.role === 'admin';
+  }
+
+  function visibleProjectsFor(user) {
+    if (isAdmin(user)) return appProjects;
+    const allowedIds = new Set(user?.allowedProjects || []);
+    return appProjects.filter((project) => allowedIds.has(project.id));
+  }
+
+  function allowedTabFor(user, requestedTab) {
+    const tab = ['projects', 'users', 'ai', 'docs'].includes(requestedTab) ? requestedTab : 'projects';
+    if (isAdmin(user)) return tab;
+    return 'projects';
+  }
+
+  function requireAdmin(req, res) {
+    const user = requireSession(req, res);
+    if (!user) return null;
+    if (!isAdmin(user)) {
+      res.status(403).json({ error: 'Forbidden' });
+      return null;
+    }
+    return user;
   }
 
   function hasSession(req) {
@@ -167,19 +195,21 @@ function createApp(config = {}) {
       return;
     }
 
-    const activeTab = ['projects', 'users', 'ai', 'docs'].includes(req.query.tab) ? req.query.tab : 'projects';
-    const projectHealth = activeTab === 'projects' ? await Promise.all(appProjects.map(checkProjectHealth)) : [];
+    const activeTab = allowedTabFor(user, req.query.tab);
+    const visibleProjects = visibleProjectsFor(user);
+    const projectHealth = activeTab === 'projects' ? await Promise.all(visibleProjects.map(checkProjectHealth)) : [];
     const documentation = activeTab === 'docs' ? docsStore.listDocuments() : { projects: [] };
     const selectedDocument = activeTab === 'docs' && req.query.project && req.query.doc
       ? docsStore.getDocument(req.query.project, req.query.doc)
       : null;
 
     res.status(200).send(renderPortalPage({
-      projects: appProjects,
+      projects: visibleProjects,
       projectHealth,
       user,
       activeTab,
       users: configStore.listUsers(),
+      userProjects: appProjects,
       aiConfig: configStore.getAiConfigPublic(),
       documentation,
       selectedDocument,
@@ -191,24 +221,24 @@ function createApp(config = {}) {
   app.get('/health/projects', async (req, res) => {
     const user = requireSession(req, res);
     if (!user) return;
-    const statuses = await Promise.all(appProjects.map(checkProjectHealth));
+    const statuses = await Promise.all(visibleProjectsFor(user).map(checkProjectHealth));
     res.json(statuses);
   });
 
   app.get('/docs/index', (req, res) => {
-    const user = requireSession(req, res);
+    const user = requireAdmin(req, res);
     if (!user) return;
     res.json(docsStore.listDocuments());
   });
 
   app.get('/docs/audit', (req, res) => {
-    const user = requireSession(req, res);
+    const user = requireAdmin(req, res);
     if (!user) return;
     res.json(docsStore.auditDocuments());
   });
 
   app.get('/docs/view', (req, res) => {
-    const user = requireSession(req, res);
+    const user = requireAdmin(req, res);
     if (!user) return;
     const document = docsStore.getDocument(req.query.project, req.query.path);
     if (!document) {
@@ -238,7 +268,7 @@ function createApp(config = {}) {
       return;
     }
     try {
-      configStore.createUser({ username: req.body.username, password: req.body.password, role: req.body.role });
+      configStore.createUser({ username: req.body.username, password: req.body.password, role: req.body.role, allowedProjects: req.body.allowedProjects });
       redirectWithNotice(res, '/', { tab: 'users', message: '用户已新增' });
     } catch (error) {
       redirectWithNotice(res, '/', { tab: 'users', error: error.message });
@@ -270,6 +300,21 @@ function createApp(config = {}) {
     try {
       configStore.resetPassword(req.params.username, req.body.password);
       redirectWithNotice(res, '/', { tab: 'users', message: '密码已重置' });
+    } catch (error) {
+      redirectWithNotice(res, '/', { tab: 'users', error: error.message });
+    }
+  });
+
+  app.post('/users/:username/projects', (req, res) => {
+    const user = requireSession(req, res);
+    if (!user) return;
+    if (user.role !== 'admin') {
+      redirectWithNotice(res, '/', { tab: 'users', error: '只有管理员可以操作' });
+      return;
+    }
+    try {
+      configStore.setUserProjects(req.params.username, req.body.allowedProjects);
+      redirectWithNotice(res, '/', { tab: 'users', message: '模块权限已更新' });
     } catch (error) {
       redirectWithNotice(res, '/', { tab: 'users', error: error.message });
     }

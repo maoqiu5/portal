@@ -250,6 +250,47 @@ th { color: var(--muted); font-size: 13px; }
 .inline-form input { min-width: 160px; padding: 9px; }
 .inline-form button { padding: 9px 12px; white-space: nowrap; }
 
+.permission-form {
+  display: grid;
+  gap: 8px;
+}
+
+.project-permissions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 6px 10px;
+  min-width: 280px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.check-row input {
+  width: auto;
+  margin: 0;
+}
+
+.form-fieldset {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.form-fieldset legend {
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

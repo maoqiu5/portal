@@ -23,3 +23,10 @@ test('default project navigation includes Home Assistant control panel', () => {
   assert.equal(homeassistant.path, '/homeassistant');
   assert.equal(homeassistant.healthUrl, 'http://homeassistant_app:3000/health');
 });
+
+test('default project navigation includes overseas rail cost module', () => {
+  const railCost = projects.find((project) => project.id === 'rail-cost');
+  assert.ok(railCost);
+  assert.equal(railCost.name, '境外段铁路成本');
+  assert.equal(railCost.path, '/rail-cost');
+});

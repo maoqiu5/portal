@@ -152,15 +152,35 @@ function renderProjectGrid(projects, projectHealth = []) {
   return `<section class="project-grid">${cards}</section>`;
 }
 
-function renderUsersPanel(users) {
+function renderProjectCheckboxes(projects, selectedIds = [], fieldName = 'allowedProjects') {
+  const selected = new Set(selectedIds);
+  return `
+        <div class="project-permissions">
+          ${projects.map((project) => `
+          <label class="check-row">
+            <input type="checkbox" name="${escapeHtml(fieldName)}" value="${escapeHtml(project.id)}"${selected.has(project.id) ? ' checked' : ''}>
+            <span>${escapeHtml(project.name)}</span>
+          </label>`).join('')}
+        </div>`;
+}
+
+function renderUsersPanel(users, userProjects = []) {
   const rows = users.map((user) => {
     const statusLabel = user.status === 'active' ? '启用' : '停用';
     const roleLabel = user.role === 'admin' ? '管理员' : '普通用户';
+    const projectForm = user.role === 'admin'
+      ? '<span class="muted-line">管理员默认可见全部模块</span>'
+      : `
+        <form method="post" action="/users/${encodeURIComponent(user.username)}/projects" class="permission-form">
+          ${renderProjectCheckboxes(userProjects, user.allowedProjects)}
+          <button type="submit" class="secondary">保存模块</button>
+        </form>`;
     return `
     <tr>
       <td><strong>${escapeHtml(user.username)}</strong></td>
       <td>${roleLabel}</td>
       <td>${statusLabel}</td>
+      <td>${projectForm}</td>
       <td>
         <form method="post" action="/users/${encodeURIComponent(user.username)}/status" class="inline-form">
           <input type="hidden" name="status" value="${user.status === 'active' ? 'disabled' : 'active'}">
@@ -184,7 +204,7 @@ function renderUsersPanel(users) {
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>用户</th><th>角色</th><th>状态</th><th>启停</th><th>重置密码</th></tr></thead>
+          <thead><tr><th>用户</th><th>角色</th><th>状态</th><th>可见模块</th><th>启停</th><th>重置密码</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
@@ -193,6 +213,10 @@ function renderUsersPanel(users) {
         <label>用户名<input name="username" autocomplete="off" required></label>
         <label>初始密码<input name="password" type="password" minlength="6" required></label>
         <label>角色<select name="role"><option value="user">普通用户</option><option value="admin">管理员</option></select></label>
+        <fieldset class="form-fieldset">
+          <legend>可见模块</legend>
+          ${renderProjectCheckboxes(userProjects)}
+        </fieldset>
         <button type="submit">新增用户</button>
       </form>
     </section>`;
@@ -346,10 +370,10 @@ function renderDocsPanel(documentation = { projects: [] }, selectedDocument = nu
     </section>`;
 }
 
-function renderPortalPage({ projects, projectHealth = [], user, activeTab = 'projects', users = [], aiConfig, documentation, selectedDocument, message = '', error = '' }) {
+function renderPortalPage({ projects, projectHealth = [], user, activeTab = 'projects', users = [], userProjects = [], aiConfig, documentation, selectedDocument, message = '', error = '' }) {
   const tab = ['projects', 'users', 'ai', 'docs'].includes(activeTab) ? activeTab : 'projects';
   const body = tab === 'users'
-    ? renderUsersPanel(users)
+    ? renderUsersPanel(users, userProjects)
     : tab === 'ai'
       ? renderAiPanel(aiConfig)
       : tab === 'docs'
@@ -369,9 +393,9 @@ function renderPortalPage({ projects, projectHealth = [], user, activeTab = 'pro
       </header>
       <nav class="portal-tabs">
         <a class="${tab === 'projects' ? 'active' : ''}" href="/">项目导航</a>
-        <a class="${tab === 'users' ? 'active' : ''}" href="/?tab=users">用户管理</a>
-        <a class="${tab === 'ai' ? 'active' : ''}" href="/?tab=ai">AI 接口</a>
-        <a class="${tab === 'docs' ? 'active' : ''}" href="/?tab=docs">文档中心</a>
+        ${user.role === 'admin' ? `<a class="${tab === 'users' ? 'active' : ''}" href="/?tab=users">用户管理</a>` : ''}
+        ${user.role === 'admin' ? `<a class="${tab === 'ai' ? 'active' : ''}" href="/?tab=ai">AI 接口</a>` : ''}
+        ${user.role === 'admin' ? `<a class="${tab === 'docs' ? 'active' : ''}" href="/?tab=docs">文档中心</a>` : ''}
       </nav>
       ${renderNotice({ message, error })}
       ${body}

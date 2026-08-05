@@ -11,6 +11,7 @@
 | 邮件工作台 | `/maildesk` | `/root/apps/maildesk` | `/root/apps/maildesk/docs/README.md` |
 | GPS 工具 | `/gps` | `/root/apps/gps` | `/root/apps/gps/docs/README.md` |
 | 境外运价 | `/rates` | `/root/apps/rates` | `/root/apps/rates/docs/README.md` |
+| 境外段铁路成本 | `/rail-cost` | `/root/apps/rail-cost` | `/root/apps/rail-cost/docs/README.md` |
 | 聚合学习工作台 | `/learndesk` | `/root/apps/learndesk` | `/root/apps/learndesk/docs/README.md` |
 | 翻译助手 | `/translator` | `/root/apps/translator` | `/root/apps/translator/docs/README.md` |
 | NAS 管理 | `/nas` | `/root/apps/nas` | `/root/apps/nas/docs/README.md` |
@@ -20,7 +21,7 @@
 ## 统一原则
 
 - 所有项目通过 `https://brianhub.net/` 统一入口访问。
-- 登录、用户和 AI API 参数由门户统一管理。
+- 登录、用户、模块权限和 AI API 参数由门户统一管理。
 - 每个业务项目保留自己的数据目录、数据库和容器命名空间。
 - 网关、SSO、AI 统一配置等跨项目规则以门户文档为主版本。
 - 项目文档以 VPS 当前文件为准，门户只读展示。
