@@ -230,6 +230,58 @@ test('POST /ai-config saves ai config and internal endpoint returns secret only 
   assert.equal(allowedRes.body.apiKey, 'sk-secret');
 });
 
+test('POST /notification-config saves wecom config and internal endpoint returns secret only with internal token', async () => {
+  const instance = app();
+  const agent = await loginAgent(instance);
+  const saveRes = await agent.post('/notification-config').type('form').send({
+    enabled: '1',
+    appName: 'Ops Alerts',
+    corpId: 'ww-corp',
+    agentId: '1000002',
+    secret: 'wecom-secret',
+    touser: 'brian|cindy',
+    toparty: '2',
+    totag: 'ops',
+    webhook: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=abc',
+    markdownTemplate: '## {{title}}\n{{content}}'
+  });
+  assert.equal(saveRes.status, 302);
+  assert.equal(saveRes.headers.location, '/?tab=notifications&message=Notification+settings+saved');
+
+  const publicRes = await agent.get('/?tab=notifications');
+  assert.match(publicRes.text, /Notification interface/);
+  assert.match(publicRes.text, /weco\.\.\.cret/);
+  assert.match(publicRes.text, /Ops Alerts/);
+  assert.doesNotMatch(publicRes.text, /wecom-secret/);
+
+  assert.equal((await request(instance).get('/internal/notification-config')).status, 401);
+  const allowedRes = await request(instance).get('/internal/notification-config').set('X-Internal-Token', 'session-secret');
+  assert.equal(allowedRes.status, 200);
+  assert.equal(allowedRes.body.secret, 'wecom-secret');
+  assert.equal(allowedRes.body.corpId, 'ww-corp');
+  assert.equal(allowedRes.body.agentId, '1000002');
+  assert.equal(allowedRes.body.touser, 'brian|cindy');
+  assert.equal(allowedRes.body.markdownTemplate, '## {{title}}\n{{content}}');
+});
+
+test('notification interface is admin-only and hidden from regular users', async () => {
+  const instance = app();
+  const admin = await loginAgent(instance);
+  await admin.post('/users/create').type('form').send({ username: 'cindy', password: 'pass1234', role: 'user', allowedProjects: ['rail-cost'] });
+
+  const cindy = request.agent(instance);
+  await cindy.post('/login').type('form').send({ username: 'cindy', password: 'pass1234', returnTo: '/' });
+
+  const home = await cindy.get('/');
+  assert.doesNotMatch(home.text, />Notifications</);
+  assert.equal((await cindy.get('/?tab=notifications')).status, 200);
+  assert.doesNotMatch((await cindy.get('/?tab=notifications')).text, /Notification interface/);
+
+  const postRes = await cindy.post('/notification-config').type('form').send({ enabled: '1', appName: 'Bad' });
+  assert.equal(postRes.status, 302);
+  assert.match(postRes.headers.location, /^\/\?tab=notifications&error=/);
+});
+
 test('POST /ai-config/test validates saved ai config without exposing the secret', async () => {
   const fetchCalls = [];
   const instance = app({

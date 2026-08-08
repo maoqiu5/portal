@@ -29,6 +29,10 @@
 		reverse_proxy portal_frontend:3000
 	}
 
+	handle /notification-config* {
+		reverse_proxy portal_frontend:3000
+	}
+
 	handle /health/projects {
 		reverse_proxy portal_frontend:3000
 	}
@@ -38,6 +42,10 @@
 	}
 
 	handle /internal/ai-config {
+		reverse_proxy portal_frontend:3000
+	}
+
+	handle /internal/notification-config {
 		reverse_proxy portal_frontend:3000
 	}
 

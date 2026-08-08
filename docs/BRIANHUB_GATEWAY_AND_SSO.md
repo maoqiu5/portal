@@ -31,3 +31,12 @@
 - 网关和 SSO 的主规则写在本文件。
 - 业务项目如需引用，只在自己的 `docs/README.md` 或 DEPLOYMENT 中链接本文件。
 - 不在多个项目复制维护同一套跨项目规则正文。
+
+## 通知接口配置规则
+
+- 企业微信应用通知参数由门户登录后的 `通知接口` 模块统一维护，仅管理员可见。
+- 统一字段包括启用状态、应用名称、企业 ID、AgentId、Secret、touser、toparty、totag、Webhook 地址和 Markdown 模板。
+- 业务项目通过门户内部接口 `/internal/notification-config` 读取配置。
+- 内部读取必须携带 `X-Internal-Token`。
+- 企业微信 Secret 只在服务端保存，页面只显示脱敏值，不写入前端页面、URL、日志、文档和测试输出。
+- 项目内旧的企业微信通知配置 UI、Secret 环境变量或重复配置应逐步删除或标记废弃。

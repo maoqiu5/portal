@@ -86,7 +86,7 @@ function createApp(config = {}) {
   }
 
   function allowedTabFor(user, requestedTab) {
-    const tab = ['projects', 'users', 'ai', 'docs'].includes(requestedTab) ? requestedTab : 'projects';
+    const tab = ['projects', 'users', 'ai', 'notifications', 'docs'].includes(requestedTab) ? requestedTab : 'projects';
     if (isAdmin(user)) return tab;
     return 'projects';
   }
@@ -239,6 +239,7 @@ function createApp(config = {}) {
       users: configStore.listUsers(),
       userProjects: appProjects,
       aiConfig: configStore.getAiConfigPublic(),
+      notificationConfig: configStore.getNotificationConfigPublic(),
       documentation,
       selectedDocument,
       message: req.query.message,
@@ -395,12 +396,36 @@ function createApp(config = {}) {
     }
   });
 
+  app.post('/notification-config', (req, res) => {
+    const user = requireSession(req, res);
+    if (!user) return;
+    const locale = currentLocale(req, user);
+    if (user.role !== 'admin') {
+      redirectWithNotice(res, '/', { tab: 'notifications', error: t(locale, 'adminOnly') });
+      return;
+    }
+    try {
+      configStore.saveNotificationConfig(req.body);
+      redirectWithNotice(res, '/', { tab: 'notifications', message: t(locale, 'notificationConfigSaved') });
+    } catch (error) {
+      redirectWithNotice(res, '/', { tab: 'notifications', error: error.message });
+    }
+  });
+
   app.get('/internal/ai-config', (req, res) => {
     if (!internalToken || req.get('X-Internal-Token') !== internalToken) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
     res.json(configStore.getAiConfigInternal());
+  });
+
+  app.get('/internal/notification-config', (req, res) => {
+    if (!internalToken || req.get('X-Internal-Token') !== internalToken) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    res.json(configStore.getNotificationConfigInternal());
   });
 
   app.post('/logout', (req, res) => {

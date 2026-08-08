@@ -159,6 +159,42 @@ const messages = {
   }
 };
 
+Object.assign(messages['en-US'], {
+  notifications: 'Notifications',
+  notificationInterface: 'Notification interface',
+  notificationDescription: 'Stores WeCom app notification settings for projects to read. Secrets remain server-side.',
+  appName: 'Application name',
+  corpId: 'Corp ID',
+  agentId: 'Agent ID',
+  wecomSecret: 'WeCom secret',
+  touser: 'Users',
+  toparty: 'Departments',
+  totag: 'Tags',
+  webhook: 'Webhook URL',
+  markdownTemplate: 'Markdown template',
+  currentSecret: 'Current secret',
+  saveNotificationConfig: 'Save notification settings',
+  notificationConfigSaved: 'Notification settings saved'
+});
+
+Object.assign(messages['zh-CN'], {
+  notifications: '通知接口',
+  notificationInterface: '通知接口',
+  notificationDescription: '统一保存各项目读取的企业微信应用通知参数；Secret 只在服务端保存。',
+  appName: '应用名称',
+  corpId: '企业 ID',
+  agentId: '应用 AgentId',
+  wecomSecret: '企业微信 Secret',
+  touser: '接收用户',
+  toparty: '接收部门',
+  totag: '接收标签',
+  webhook: 'Webhook 地址',
+  markdownTemplate: 'Markdown 模板',
+  currentSecret: '当前 Secret',
+  saveNotificationConfig: '保存通知接口配置',
+  notificationConfigSaved: '通知接口配置已保存'
+});
+
 const projectTranslations = {
   usstock: { 'en-US': ['US Stocks', 'US stock prices, portfolios, and trading observations.'], 'zh-CN': ['美股', '美股行情、组合和交易观察台。'] },
   cnstock: { 'en-US': ['China A Shares', 'China A-share market tracking and analysis.'], 'zh-CN': ['A 股', 'A 股行情跟踪和市场分析工作台。'] },

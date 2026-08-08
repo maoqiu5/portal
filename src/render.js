@@ -275,6 +275,36 @@ function renderAiPanel(aiConfig, locale = 'en-US') {
     </section>`;
 }
 
+function renderNotificationPanel(notificationConfig, locale = 'en-US') {
+  const normalized = normalizeLocale(locale);
+  return `
+    <section class="panel">
+      <div class="section-head">
+        <h2>${t(normalized, 'notificationInterface')}</h2>
+        <p>${t(normalized, 'notificationDescription')}</p>
+      </div>
+      <form method="post" action="/notification-config" class="form-grid">
+        <label>${t(normalized, 'status')}
+          <select name="enabled">
+            <option value="1"${notificationConfig.enabled ? ' selected' : ''}>${t(normalized, 'enabled')}</option>
+            <option value="0"${notificationConfig.enabled ? '' : ' selected'}>${t(normalized, 'disabled')}</option>
+          </select>
+        </label>
+        <label>${t(normalized, 'appName')}<input name="appName" value="${escapeHtml(notificationConfig.appName)}"></label>
+        <label>${t(normalized, 'corpId')}<input name="corpId" value="${escapeHtml(notificationConfig.corpId)}"></label>
+        <label>${t(normalized, 'agentId')}<input name="agentId" value="${escapeHtml(notificationConfig.agentId)}"></label>
+        <label>${t(normalized, 'wecomSecret')}<input name="secret" type="password" placeholder="${escapeHtml(notificationConfig.secretMask || t(normalized, 'noKeyConfigured'))}"></label>
+        <label>${t(normalized, 'touser')}<input name="touser" value="${escapeHtml(notificationConfig.touser)}" placeholder="@all"></label>
+        <label>${t(normalized, 'toparty')}<input name="toparty" value="${escapeHtml(notificationConfig.toparty)}"></label>
+        <label>${t(normalized, 'totag')}<input name="totag" value="${escapeHtml(notificationConfig.totag)}"></label>
+        <label>${t(normalized, 'webhook')}<input name="webhook" value="${escapeHtml(notificationConfig.webhook)}"></label>
+        <label class="form-full">${t(normalized, 'markdownTemplate')}<textarea name="markdownTemplate" rows="6">${escapeHtml(notificationConfig.markdownTemplate)}</textarea></label>
+        <button type="submit">${t(normalized, 'saveNotificationConfig')}</button>
+      </form>
+      <p class="muted-line">${t(normalized, 'currentSecret')}: ${notificationConfig.hasSecret ? escapeHtml(notificationConfig.secretMask) : t(normalized, 'noKeyConfigured')}</p>
+    </section>`;
+}
+
 function auditLabel(audit, locale = 'en-US') {
   const normalized = normalizeLocale(locale);
   if (!audit) return { className: 'doc-status unknown', text: t(normalized, 'unknown') };
@@ -399,16 +429,18 @@ function renderDocsPanel(documentation = { projects: [] }, selectedDocument = nu
     </section>`;
 }
 
-function renderPortalPage({ projects, projectHealth = [], user, locale = 'en-US', returnTo = '/', activeTab = 'projects', users = [], userProjects = [], aiConfig, documentation, selectedDocument, message = '', error = '' }) {
+function renderPortalPage({ projects, projectHealth = [], user, locale = 'en-US', returnTo = '/', activeTab = 'projects', users = [], userProjects = [], aiConfig, notificationConfig, documentation, selectedDocument, message = '', error = '' }) {
   const normalized = normalizeLocale(locale);
-  const tab = ['projects', 'users', 'ai', 'docs'].includes(activeTab) ? activeTab : 'projects';
+  const tab = ['projects', 'users', 'ai', 'notifications', 'docs'].includes(activeTab) ? activeTab : 'projects';
   const body = tab === 'users'
     ? renderUsersPanel(users, userProjects, normalized)
     : tab === 'ai'
       ? renderAiPanel(aiConfig, normalized)
-      : tab === 'docs'
-        ? renderDocsPanel(documentation, selectedDocument, normalized)
-        : renderProjectGrid(projects, projectHealth, normalized);
+      : tab === 'notifications'
+        ? renderNotificationPanel(notificationConfig, normalized)
+        : tab === 'docs'
+          ? renderDocsPanel(documentation, selectedDocument, normalized)
+          : renderProjectGrid(projects, projectHealth, normalized);
   const roleLabel = user.role === 'admin' ? t(normalized, 'administrator') : t(normalized, 'standardUser');
 
   return layout(t(normalized, 'portalTitle'), `
@@ -428,6 +460,7 @@ function renderPortalPage({ projects, projectHealth = [], user, locale = 'en-US'
         <a class="${tab === 'projects' ? 'active' : ''}" href="/">${t(normalized, 'projects')}</a>
         ${user.role === 'admin' ? `<a class="${tab === 'users' ? 'active' : ''}" href="/?tab=users">${t(normalized, 'users')}</a>` : ''}
         ${user.role === 'admin' ? `<a class="${tab === 'ai' ? 'active' : ''}" href="/?tab=ai">${t(normalized, 'ai')}</a>` : ''}
+        ${user.role === 'admin' ? `<a class="${tab === 'notifications' ? 'active' : ''}" href="/?tab=notifications">${t(normalized, 'notifications')}</a>` : ''}
         ${user.role === 'admin' ? `<a class="${tab === 'docs' ? 'active' : ''}" href="/?tab=docs">${t(normalized, 'documents')}</a>` : ''}
       </nav>
       ${renderNotice({ locale: normalized, message, error })}

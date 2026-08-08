@@ -122,6 +122,57 @@ test('config store saves ai config while preserving existing api key', () => {
   assert.equal(publicConfig.apiKeyMask, 'sk-s...cret');
 });
 
+test('config store saves notification config while preserving existing wecom secret', () => {
+  const store = createConfigStore({
+    filePath: tempConfigPath(),
+    defaultUsername: 'brian',
+    defaultPassword: 'secret'
+  });
+
+  store.saveNotificationConfig({
+    enabled: true,
+    appName: 'Ops Alerts',
+    corpId: 'ww-corp',
+    agentId: '1000002',
+    secret: 'wecom-secret',
+    touser: 'brian|cindy',
+    toparty: '2',
+    totag: 'ops',
+    webhook: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=abc',
+    markdownTemplate: '## {{title}}\n{{content}}'
+  });
+
+  store.saveNotificationConfig({
+    enabled: false,
+    appName: 'Daily Notice',
+    corpId: 'ww-next',
+    agentId: '1000003',
+    secret: '',
+    touser: '@all',
+    toparty: '',
+    totag: '',
+    webhook: '',
+    markdownTemplate: '{{content}}'
+  });
+
+  const internal = store.getNotificationConfigInternal();
+  assert.equal(internal.enabled, false);
+  assert.equal(internal.appName, 'Daily Notice');
+  assert.equal(internal.corpId, 'ww-next');
+  assert.equal(internal.agentId, '1000003');
+  assert.equal(internal.secret, 'wecom-secret');
+  assert.equal(internal.touser, '@all');
+  assert.equal(internal.toparty, '');
+  assert.equal(internal.totag, '');
+  assert.equal(internal.webhook, '');
+  assert.equal(internal.markdownTemplate, '{{content}}');
+
+  const publicConfig = store.getNotificationConfigPublic();
+  assert.equal(publicConfig.secret, undefined);
+  assert.equal(publicConfig.hasSecret, true);
+  assert.equal(publicConfig.secretMask, 'weco...cret');
+});
+
 test('maskSecret hides short and empty secrets', () => {
   assert.equal(maskSecret(''), '');
   assert.equal(maskSecret('abcd'), '****');

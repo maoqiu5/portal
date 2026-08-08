@@ -12,6 +12,19 @@ const DEFAULT_AI_CONFIG = {
   analysisLimit: 50
 };
 
+const DEFAULT_NOTIFICATION_CONFIG = {
+  enabled: false,
+  appName: '',
+  corpId: '',
+  agentId: '',
+  secret: '',
+  touser: '',
+  toparty: '',
+  totag: '',
+  webhook: '',
+  markdownTemplate: '## {{title}}\n{{content}}'
+};
+
 const DEFAULT_PROJECT_IDS = [
   'usstock',
   'cnstock',
@@ -86,6 +99,7 @@ function createDefaultConfig(defaultUsername, defaultPassword) {
       }
     ],
     aiConfig: { ...DEFAULT_AI_CONFIG },
+    notificationConfig: { ...DEFAULT_NOTIFICATION_CONFIG },
     updatedAt: timestamp
   };
 }
@@ -116,6 +130,10 @@ function sanitizeConfig(config, defaults) {
     aiConfig: {
       ...DEFAULT_AI_CONFIG,
       ...(base.aiConfig && typeof base.aiConfig === 'object' ? base.aiConfig : {})
+    },
+    notificationConfig: {
+      ...DEFAULT_NOTIFICATION_CONFIG,
+      ...(base.notificationConfig && typeof base.notificationConfig === 'object' ? base.notificationConfig : {})
     },
     updatedAt: base.updatedAt || nowIso()
   };
@@ -285,6 +303,46 @@ function createConfigStore(options = {}) {
     return getAiConfigPublic();
   }
 
+  function getNotificationConfigInternal() {
+    return { ...DEFAULT_NOTIFICATION_CONFIG, ...readConfig().notificationConfig };
+  }
+
+  function getNotificationConfigPublic() {
+    const config = getNotificationConfigInternal();
+    return {
+      enabled: Boolean(config.enabled),
+      appName: config.appName,
+      corpId: config.corpId,
+      agentId: config.agentId,
+      touser: config.touser,
+      toparty: config.toparty,
+      totag: config.totag,
+      webhook: config.webhook,
+      markdownTemplate: config.markdownTemplate,
+      hasSecret: Boolean(config.secret),
+      secretMask: maskSecret(config.secret)
+    };
+  }
+
+  function saveNotificationConfig(input) {
+    updateConfig((config) => {
+      const current = { ...DEFAULT_NOTIFICATION_CONFIG, ...config.notificationConfig };
+      config.notificationConfig = {
+        enabled: input.enabled === true || input.enabled === '1' || input.enabled === 'true',
+        appName: String(input.appName || '').trim(),
+        corpId: String(input.corpId || '').trim(),
+        agentId: String(input.agentId || '').trim(),
+        secret: String(input.secret || '').trim() || current.secret,
+        touser: String(input.touser || '').trim(),
+        toparty: String(input.toparty || '').trim(),
+        totag: String(input.totag || '').trim(),
+        webhook: String(input.webhook || '').trim(),
+        markdownTemplate: String(input.markdownTemplate || '').trim() || DEFAULT_NOTIFICATION_CONFIG.markdownTemplate
+      };
+    });
+    return getNotificationConfigPublic();
+  }
+
   return {
     readConfig,
     listUsers,
@@ -297,7 +355,10 @@ function createConfigStore(options = {}) {
     setUserLocale,
     getAiConfigInternal,
     getAiConfigPublic,
-    saveAiConfig
+    saveAiConfig,
+    getNotificationConfigInternal,
+    getNotificationConfigPublic,
+    saveNotificationConfig
   };
 }
 
