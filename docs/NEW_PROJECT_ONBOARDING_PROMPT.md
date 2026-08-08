@@ -36,6 +36,7 @@ https://brianhub.net/?tab=docs&project=portal&doc=docs%2FNEW_PROJECT_DOCUMENTATI
 8. 上线前必须写清部署、验证、回滚和健康检查方式。
 9. 不得在代码、文档、日志、页面或接口返回中泄露真实密码、API Key、Cookie、内部令牌或私钥。
 10. 上线后必须能在 BrianHub 门户文档中心看到项目文档。
+11. 新项目必须按 `BRIANHUB_LANGUAGE_STANDARD.md` 接入中文 / 英文 UI；未知语言统一回退 `en-US`。
 11. 项目默认建立本地 Git 仓库，并推送到 VPS 裸仓库 `/root/git/<项目名>.git`；远端名使用 `vps`，`git push` 只做版本管理，不自动部署，除非项目文档另有明确说明。
 12. `.gitignore` 必须排除生产环境文件、数据库、依赖目录、运行数据、日志、备份、密钥目录和 Codex 临时目录；允许提交不含真实值的 `.env.production.example`。
 

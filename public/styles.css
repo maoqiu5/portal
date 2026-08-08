@@ -68,6 +68,46 @@ button, input, select { font: inherit; }
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
 }
 
+.login-panel-head,
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.language-switcher {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.language-switcher button {
+  min-width: 64px;
+  padding: 7px 10px;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.language-switcher button + button {
+  border-left: 1px solid var(--line);
+}
+
+.language-switcher button:hover {
+  background: #edf5f1;
+  color: var(--accent-dark);
+}
+
+.language-switcher button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
 .login-subtitle {
   margin: 12px 0 0;
   color: var(--muted);
@@ -579,6 +619,24 @@ th { color: var(--muted); font-size: 13px; }
   .notice-dialog {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .header-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .header-actions > form,
+  .header-actions > form button {
+    width: 100%;
+  }
+
+  .language-switcher {
+    width: 100%;
+  }
+
+  .language-switcher button {
+    flex: 1;
   }
 
   h1 { font-size: 28px; }

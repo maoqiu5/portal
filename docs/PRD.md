@@ -1,6 +1,6 @@
 # BrianHub 门户 PRD
 
-更新时间：2026-08-05  
+更新时间：2026-08-08  
 项目代号：`portal`  
 生产目录：`/root/apps/portal`
 
@@ -16,6 +16,7 @@ BrianHub 门户是所有 BrianHub 项目的统一入口和管理中心，负责�
 - 用户管理：创建用户、修改密码、启停账户、配置普通用户可见项目模块。
 - 项目导航：聚合美股、A 股、邮件工作台、GPS、翻译助手、聚合学习、网关等项目入口。
 - SSO 检查：为 gateway 的 `forward_auth` 提供登录校验。
+- 统一语言：保存用户语言偏好，提供中文 / English 切换，并通过网关向项目传递语言。
 - AI 接口配置：登录后统一维护 Base URL、模型、API Key、超时和分析上限。
 - 内部 AI 配置接口：业务项目通过内部令牌读取门户 AI 配置，不在各项目重复保存。
 - 文档中心：从 VPS `/root/apps` 读取各项目 Markdown 文档并展示。
@@ -32,6 +33,7 @@ BrianHub 门户是所有 BrianHub 项目的统一入口和管理中心，负责�
 - 管理员可以访问项目导航、用户管理、AI 接口配置和文档中心。
 - 普通用户只能看到被授权的项目模块，不显示用户管理、AI 接口和文档中心。
 - 普通用户的项目可见范围由用户配置中的 `allowedProjects` 控制；管理员默认可见全部模块。
+- 用户语言偏好保存在 `locale` 字段；支持 `zh-CN` 和 `en-US`，未知语言统一回退 `en-US`。
 - 内部配置接口只允许携带内部令牌的服务调用。
 
 ## 4. 项目边界
@@ -39,6 +41,7 @@ BrianHub 门户是所有 BrianHub 项目的统一入口和管理中心，负责�
 门户负责：
 
 - 登录会话和用户配置。
+- 语言 Cookie `brianhub_locale`、用户语言偏好和门户语言切换。
 - AI 接口配置的保存、脱敏展示和内部读取。
 - 文档索引、文档渲染和文档审计。
 - 项目导航、健康概览和统一入口体验。
@@ -63,4 +66,5 @@ BrianHub 门户是所有 BrianHub 项目的统一入口和管理中心，负责�
 - 变更记录：[CHANGELOG.md](./CHANGELOG.md)
 - 通用开发规则：[BRIANHUB_DEVELOPMENT_STANDARD.md](./BRIANHUB_DEVELOPMENT_STANDARD.md)
 - 网关、SSO 和 AI 配置规则：[BRIANHUB_GATEWAY_AND_SSO.md](./BRIANHUB_GATEWAY_AND_SSO.md)
+- 统一双语规则：[BRIANHUB_LANGUAGE_STANDARD.md](./BRIANHUB_LANGUAGE_STANDARD.md)
 - 文档归档规则：[DOCUMENTATION_STANDARD.md](./DOCUMENTATION_STANDARD.md)

@@ -6,8 +6,10 @@ const { projects } = require('./projects');
 const { documentProjects } = require('./documentProjects');
 const { createDocumentStore } = require('./documentStore');
 const { renderLoginPage, renderPortalPage } = require('./render');
+const { normalizeLocale, t } = require('./i18n');
 
 const COOKIE_NAME = 'brianhub_session';
+const LOCALE_COOKIE_NAME = 'brianhub_locale';
 const DEFAULT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function safeReturnTo(value) {
@@ -69,6 +71,10 @@ function createApp(config = {}) {
     return configStore.getUser(session.username);
   }
 
+  function currentLocale(req, user = currentUser(req)) {
+    return normalizeLocale(req.cookies[LOCALE_COOKIE_NAME] || user?.locale);
+  }
+
   function isAdmin(user) {
     return user?.role === 'admin';
   }
@@ -116,6 +122,20 @@ function createApp(config = {}) {
       path: '/',
       maxAge: maxAgeMs
     };
+  }
+
+  function localeCookieOptions() {
+    return {
+      httpOnly: false,
+      secure: secureCookie,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: maxAgeMs
+    };
+  }
+
+  function setLocaleCookie(res, locale) {
+    res.cookie(LOCALE_COOKIE_NAME, normalizeLocale(locale), localeCookieOptions());
   }
 
   function resolveAiConfigForInput(input) {
@@ -175,7 +195,8 @@ function createApp(config = {}) {
   });
 
   app.get('/auth/check', (req, res) => {
-    if (!hasSession(req)) {
+    const user = currentUser(req);
+    if (!user) {
       if (req.query.redirect === '1') {
         const returnTo = safeReturnTo(req.get('X-Forwarded-Uri'));
         res.redirect(`/?returnTo=${encodeURIComponent(returnTo)}`);
@@ -184,17 +205,22 @@ function createApp(config = {}) {
       res.status(401).json({ authenticated: false });
       return;
     }
-    res.set('X-BrianHub-User', currentUser(req).username);
+    res.set('X-BrianHub-User', user.username);
+    res.set('X-BrianHub-Locale', currentLocale(req, user));
     res.status(204).end();
   });
 
   app.get('/', async (req, res) => {
     const user = currentUser(req);
     if (!user) {
-      res.status(200).send(renderLoginPage({ returnTo: safeReturnTo(req.query.returnTo) }));
+      res.status(200).send(renderLoginPage({
+        locale: currentLocale(req, null),
+        returnTo: safeReturnTo(req.query.returnTo)
+      }));
       return;
     }
 
+    const locale = currentLocale(req, user);
     const activeTab = allowedTabFor(user, req.query.tab);
     const visibleProjects = visibleProjectsFor(user);
     const projectHealth = activeTab === 'projects' ? await Promise.all(visibleProjects.map(checkProjectHealth)) : [];
@@ -207,6 +233,8 @@ function createApp(config = {}) {
       projects: visibleProjects,
       projectHealth,
       user,
+      locale,
+      returnTo: safeReturnTo(req.originalUrl),
       activeTab,
       users: configStore.listUsers(),
       userProjects: appProjects,
@@ -251,25 +279,37 @@ function createApp(config = {}) {
   app.post('/login', (req, res) => {
     const returnTo = safeReturnTo(req.body.returnTo);
     const user = configStore.verifyUser(req.body.username, req.body.password);
+    const locale = currentLocale(req, user);
     if (!user) {
-      res.status(401).send(renderLoginPage({ error: '用户名或密码错误', returnTo }));
+      res.status(401).send(renderLoginPage({ locale, error: t(locale, 'invalidCredentials'), returnTo }));
       return;
     }
 
+    configStore.setUserLocale(user.username, locale);
+    setLocaleCookie(res, locale);
     res.cookie(COOKIE_NAME, createSessionToken(sessionSecret, Date.now(), { username: user.username, role: user.role }), cookieOptions());
     res.redirect(returnTo);
+  });
+
+  app.post('/locale', (req, res) => {
+    const locale = normalizeLocale(req.body.locale);
+    const user = currentUser(req);
+    if (user) configStore.setUserLocale(user.username, locale);
+    setLocaleCookie(res, locale);
+    res.redirect(safeReturnTo(req.body.returnTo));
   });
 
   app.post('/users/create', (req, res) => {
     const user = requireSession(req, res);
     if (!user) return;
+    const locale = currentLocale(req, user);
     if (user.role !== 'admin') {
-      redirectWithNotice(res, '/', { tab: 'users', error: '只有管理员可以操作' });
+      redirectWithNotice(res, '/', { tab: 'users', error: t(locale, 'adminOnly') });
       return;
     }
     try {
       configStore.createUser({ username: req.body.username, password: req.body.password, role: req.body.role, allowedProjects: req.body.allowedProjects });
-      redirectWithNotice(res, '/', { tab: 'users', message: '用户已新增' });
+      redirectWithNotice(res, '/', { tab: 'users', message: t(locale, 'userCreated') });
     } catch (error) {
       redirectWithNotice(res, '/', { tab: 'users', error: error.message });
     }
@@ -278,13 +318,14 @@ function createApp(config = {}) {
   app.post('/users/:username/status', (req, res) => {
     const user = requireSession(req, res);
     if (!user) return;
+    const locale = currentLocale(req, user);
     if (user.role !== 'admin') {
-      redirectWithNotice(res, '/', { tab: 'users', error: '只有管理员可以操作' });
+      redirectWithNotice(res, '/', { tab: 'users', error: t(locale, 'adminOnly') });
       return;
     }
     try {
       configStore.setUserStatus(req.params.username, req.body.status);
-      redirectWithNotice(res, '/', { tab: 'users', message: '用户状态已更新' });
+      redirectWithNotice(res, '/', { tab: 'users', message: t(locale, 'userStatusUpdated') });
     } catch (error) {
       redirectWithNotice(res, '/', { tab: 'users', error: error.message });
     }
@@ -293,13 +334,14 @@ function createApp(config = {}) {
   app.post('/users/:username/password', (req, res) => {
     const user = requireSession(req, res);
     if (!user) return;
+    const locale = currentLocale(req, user);
     if (user.role !== 'admin') {
-      redirectWithNotice(res, '/', { tab: 'users', error: '只有管理员可以操作' });
+      redirectWithNotice(res, '/', { tab: 'users', error: t(locale, 'adminOnly') });
       return;
     }
     try {
       configStore.resetPassword(req.params.username, req.body.password);
-      redirectWithNotice(res, '/', { tab: 'users', message: '密码已重置' });
+      redirectWithNotice(res, '/', { tab: 'users', message: t(locale, 'passwordReset') });
     } catch (error) {
       redirectWithNotice(res, '/', { tab: 'users', error: error.message });
     }
@@ -308,13 +350,14 @@ function createApp(config = {}) {
   app.post('/users/:username/projects', (req, res) => {
     const user = requireSession(req, res);
     if (!user) return;
+    const locale = currentLocale(req, user);
     if (user.role !== 'admin') {
-      redirectWithNotice(res, '/', { tab: 'users', error: '只有管理员可以操作' });
+      redirectWithNotice(res, '/', { tab: 'users', error: t(locale, 'adminOnly') });
       return;
     }
     try {
       configStore.setUserProjects(req.params.username, req.body.allowedProjects);
-      redirectWithNotice(res, '/', { tab: 'users', message: '模块权限已更新' });
+      redirectWithNotice(res, '/', { tab: 'users', message: t(locale, 'modulePermissionsUpdated') });
     } catch (error) {
       redirectWithNotice(res, '/', { tab: 'users', error: error.message });
     }
@@ -323,13 +366,14 @@ function createApp(config = {}) {
   app.post('/ai-config', (req, res) => {
     const user = requireSession(req, res);
     if (!user) return;
+    const locale = currentLocale(req, user);
     if (user.role !== 'admin') {
-      redirectWithNotice(res, '/', { tab: 'ai', error: '只有管理员可以操作' });
+      redirectWithNotice(res, '/', { tab: 'ai', error: t(locale, 'adminOnly') });
       return;
     }
     try {
       configStore.saveAiConfig(req.body);
-      redirectWithNotice(res, '/', { tab: 'ai', message: 'AI 接口配置已保存' });
+      redirectWithNotice(res, '/', { tab: 'ai', message: t(locale, 'aiConfigSaved') });
     } catch (error) {
       redirectWithNotice(res, '/', { tab: 'ai', error: error.message });
     }
@@ -338,13 +382,14 @@ function createApp(config = {}) {
   app.post('/ai-config/test', async (req, res) => {
     const user = requireSession(req, res);
     if (!user) return;
+    const locale = currentLocale(req, user);
     if (user.role !== 'admin') {
-      redirectWithNotice(res, '/', { tab: 'ai', error: '只有管理员可以操作' });
+      redirectWithNotice(res, '/', { tab: 'ai', error: t(locale, 'adminOnly') });
       return;
     }
     try {
       await testAiConfig(resolveAiConfigForInput(req.body));
-      redirectWithNotice(res, '/', { tab: 'ai', message: 'AI 接口连接测试成功' });
+      redirectWithNotice(res, '/', { tab: 'ai', message: t(locale, 'aiConnectionSucceeded') });
     } catch (error) {
       redirectWithNotice(res, '/', { tab: 'ai', error: `AI 接口连接测试失败：${error.message}` });
     }

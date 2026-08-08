@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { hashPassword, verifyPasswordHash } = require('./auth');
+const { normalizeLocale } = require('./i18n');
 
 const DEFAULT_AI_CONFIG = {
   enabled: false,
@@ -79,6 +80,7 @@ function createDefaultConfig(defaultUsername, defaultPassword) {
         role: 'admin',
         status: 'active',
         allowedProjects: [],
+        locale: 'en-US',
         createdAt: timestamp,
         updatedAt: timestamp
       }
@@ -98,6 +100,7 @@ function sanitizeConfig(config, defaults) {
       role: normalizeRole(user.role),
       status: normalizeStatus(user.status),
       allowedProjects: user.allowedProjects,
+      locale: normalizeLocale(user.locale),
       createdAt: user.createdAt || nowIso(),
       updatedAt: user.updatedAt || nowIso()
     }))
@@ -161,7 +164,11 @@ function createConfigStore(options = {}) {
 
   function publicUser(user) {
     const { passwordHash, ...safeUser } = user;
-    return { ...safeUser, allowedProjects: normalizeProjectIds(user.allowedProjects) };
+    return {
+      ...safeUser,
+      allowedProjects: normalizeProjectIds(user.allowedProjects),
+      locale: normalizeLocale(user.locale)
+    };
   }
 
   function listUsers() {
@@ -182,7 +189,7 @@ function createConfigStore(options = {}) {
     return publicUser(user);
   }
 
-  function createUser({ username, password, role = 'user', allowedProjects = [] }) {
+  function createUser({ username, password, role = 'user', allowedProjects = [], locale = 'en-US' }) {
     const normalized = normalizeUsername(username);
     if (!/^[a-z0-9._-]{3,40}$/.test(normalized)) throw new Error('Invalid username');
     if (!password || password.length < 6) throw new Error('Password must be at least 6 characters');
@@ -196,6 +203,7 @@ function createConfigStore(options = {}) {
         role: normalizeRole(role),
         status: 'active',
         allowedProjects: normalizeProjectIds(allowedProjects),
+        locale: normalizeLocale(locale),
         createdAt: timestamp,
         updatedAt: timestamp
       };
@@ -231,6 +239,16 @@ function createConfigStore(options = {}) {
       const user = config.users.find((item) => item.username === normalized);
       if (!user) throw new Error('User not found');
       user.allowedProjects = normalizeProjectIds(allowedProjects);
+      user.updatedAt = nowIso();
+    });
+  }
+
+  function setUserLocale(username, locale) {
+    const normalized = normalizeUsername(username);
+    updateConfig((config) => {
+      const user = config.users.find((item) => item.username === normalized);
+      if (!user) throw new Error('User not found');
+      user.locale = normalizeLocale(locale);
       user.updatedAt = nowIso();
     });
   }
@@ -276,6 +294,7 @@ function createConfigStore(options = {}) {
     setUserStatus,
     resetPassword,
     setUserProjects,
+    setUserLocale,
     getAiConfigInternal,
     getAiConfigPublic,
     saveAiConfig

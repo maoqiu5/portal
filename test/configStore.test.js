@@ -25,7 +25,9 @@ test('config store initializes default admin user from env', () => {
   assert.equal(config.users[0].username, 'brian');
   assert.equal(config.users[0].role, 'admin');
   assert.equal(config.users[0].status, 'active');
+  assert.equal(config.users[0].locale, 'en-US');
   assert.equal(store.verifyUser('brian', 'secret')?.role, 'admin');
+  assert.equal(store.verifyUser('brian', 'secret')?.locale, 'en-US');
   assert.equal(store.verifyUser('brian', 'wrong'), null);
 });
 
@@ -45,9 +47,26 @@ test('config store manages users without exposing password hashes in list', () =
   const verified = store.verifyUser('alice', 'nextpass');
   assert.equal(verified?.username, 'alice');
   assert.deepEqual(verified.allowedProjects, ['rail-cost']);
+  assert.equal(verified.locale, 'en-US');
   const listed = store.listUsers().find((user) => user.username === 'alice');
   assert.equal(listed.passwordHash, undefined);
   assert.deepEqual(listed.allowedProjects, ['rail-cost']);
+  assert.equal(listed.locale, 'en-US');
+});
+
+test('config store updates user locale and falls back to English for unknown values', () => {
+  const store = createConfigStore({
+    filePath: tempConfigPath(),
+    defaultUsername: 'brian',
+    defaultPassword: 'secret'
+  });
+
+  store.setUserLocale('brian', 'zh-CN');
+  assert.equal(store.verifyUser('brian', 'secret').locale, 'zh-CN');
+  assert.equal(store.listUsers().find((user) => user.username === 'brian').locale, 'zh-CN');
+
+  store.setUserLocale('brian', 'fr-FR');
+  assert.equal(store.verifyUser('brian', 'secret').locale, 'en-US');
 });
 
 test('config store updates user project permissions', () => {
