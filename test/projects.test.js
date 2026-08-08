@@ -39,9 +39,12 @@ test('default project navigation replaces rates with factsheet entry', () => {
   assert.equal(factsheet.healthUrl, 'http://factsheet_app:3000/health');
 });
 
-test('factsheet has Chinese portal label and description', () => {
+test('factsheet has rail freight query labels in both locales', () => {
   const factsheet = projects.find((project) => project.id === 'factsheet');
-  const localized = localizeProject(factsheet, 'zh-CN');
-  assert.equal(localized.name, '中欧班列铁路运价');
-  assert.equal(localized.description, '事实表项目入口。');
+  const chinese = localizeProject(factsheet, 'zh-CN');
+  const english = localizeProject(factsheet, 'en-US');
+  assert.equal(chinese.name, '铁路与卡车运费查询');
+  assert.equal(chinese.description, '铁路和卡车运费查询工具。');
+  assert.equal(english.name, 'Rail Freight Query');
+  assert.equal(english.description, 'A tool for querying rail and truck freight rates.');
 });

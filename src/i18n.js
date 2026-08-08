@@ -201,7 +201,7 @@ const projectTranslations = {
   yanqing: { 'en-US': ['Yanqing Research', 'AI-powered individual stock research workspace.'], 'zh-CN': ['研擎', '独立 AI 个股深研工作台。'] },
   maildesk: { 'en-US': ['Maildesk', 'Email workflows, customer tasks, and case handling.'], 'zh-CN': ['邮件工作台', '日常邮件流程、客户事务和案例处理。'] },
   gps: { 'en-US': ['GPS Tools', 'Location, tracking, and GPS workflows.'], 'zh-CN': ['GPS 工具', '定位、轨迹和 GPS 相关工作流。'] },
-  factsheet: { 'en-US': ['Factsheet', 'Factsheet project entry.'], 'zh-CN': ['中欧班列铁路运价', '事实表项目入口。'] },
+  factsheet: { 'en-US': ['Rail Freight Query', 'A tool for querying rail and truck freight rates.'], 'zh-CN': ['铁路与卡车运费查询', '铁路和卡车运费查询工具。'] },
   'rail-cost': { 'en-US': ['Overseas Rail Cost', 'Overseas rail cost and TC container lease price lookup.'], 'zh-CN': ['境外段铁路成本', '境外段铁路成本和 TC 箱租箱价格查询模块。'] },
   learndesk: { 'en-US': ['LearnDesk', 'AI-guided learning, research, courses, and project records.'], 'zh-CN': ['聚合学习工作台', 'AI 老师式聚合学习、主题研究、课程讲义和学习项目留档。'] },
   nas: { 'en-US': ['NAS Management', 'NAS capacity, load, Docker containers, and storage scans.'], 'zh-CN': ['NAS 管理', 'NAS 存储容量、系统负载、Docker 容器和空间扫描驾驶舱。'] },
