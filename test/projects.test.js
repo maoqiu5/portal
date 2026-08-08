@@ -10,11 +10,9 @@ test('default project navigation includes LearnDesk', () => {
   assert.equal(learndesk.healthUrl, 'http://learndesk_app:3000/health');
 });
 
-test('default project navigation includes NAS management', () => {
+test('default project navigation hides NAS management', () => {
   const nas = projects.find((project) => project.id === 'nas');
-  assert.ok(nas);
-  assert.equal(nas.path, '/nas');
-  assert.equal(nas.healthUrl, 'http://172.19.0.1:13001/health');
+  assert.equal(nas, undefined);
 });
 
 

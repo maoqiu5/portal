@@ -185,7 +185,7 @@ test('admin can update user project permissions from user management', async () 
   await cindy.post('/login').type('form').send({ username: 'cindy', password: 'pass1234', returnTo: '/' });
   const home = await cindy.get('/');
   assert.match(home.text, /Overseas Rail Cost/);
-  assert.match(home.text, /NAS Management/);
+  assert.doesNotMatch(home.text, /NAS Management/);
   assert.doesNotMatch(home.text, /US Stocks/);
 });
 
