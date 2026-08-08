@@ -1,12 +1,13 @@
 :root {
   color-scheme: light;
-  --bg: #f5f7f8;
+  --bg: #f5f7fb;
   --panel: #ffffff;
-  --text: #172026;
-  --muted: #61707c;
-  --line: #d9e0e5;
-  --accent: #1f7a5a;
-  --accent-dark: #145c43;
+  --text: #172033;
+  --muted: #617089;
+  --line: #dce3ee;
+  --accent: #0b6bcb;
+  --accent-dark: #074f96;
+  --soft: #edf5ff;
   --danger: #b42318;
   --success: #17854f;
 }
@@ -42,30 +43,34 @@ button, input, select, textarea { font: inherit; }
   position: fixed;
   inset: 0;
   z-index: 0;
+  /* Railway freight background to match the rail-cost product family. */
   background-image:
-    linear-gradient(90deg, rgba(12, 31, 38, 0.74), rgba(12, 31, 38, 0.38)),
-    url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=85");
+    linear-gradient(90deg, rgba(7, 28, 52, 0.82), rgba(7, 79, 150, 0.48), rgba(245, 247, 251, 0.12)),
+    url("https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&fit=crop&w=1800&q=85");
   background-size: cover;
-  background-position: center;
+  background-position: center 58%;
 }
 
 .login-background::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(1px);
+  background:
+    linear-gradient(180deg, rgba(245, 247, 251, 0.08), rgba(7, 28, 52, 0.16));
+  backdrop-filter: blur(0.5px);
 }
 
 .login-panel {
   position: relative;
   z-index: 1;
-  width: min(430px, 100%);
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.62);
+  width: min(440px, 100%);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(220, 227, 238, 0.82);
+  border-top: 4px solid var(--accent);
   border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  padding: 32px;
+  box-shadow: 0 26px 72px rgba(7, 28, 52, 0.32);
+  backdrop-filter: blur(10px);
 }
 
 .login-panel-head,
@@ -99,7 +104,7 @@ button, input, select, textarea { font: inherit; }
 }
 
 .language-switcher button:hover {
-  background: #edf5f1;
+  background: var(--soft);
   color: var(--accent-dark);
 }
 
@@ -137,6 +142,12 @@ input, select, textarea {
   color: var(--text);
 }
 
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(11, 107, 203, 0.14);
+  outline: none;
+}
+
 textarea {
   min-height: 140px;
   resize: vertical;
@@ -155,7 +166,7 @@ button {
 button:hover { background: var(--accent-dark); }
 
 button.secondary {
-  background: #e8eef0;
+  background: #edf2f7;
   color: var(--text);
 }
 
@@ -242,7 +253,11 @@ button.secondary {
   text-decoration: none;
 }
 
-.project-card:hover { border-color: var(--accent); }
+.project-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 16px 36px rgba(23, 32, 51, 0.08);
+  transform: translateY(-1px);
+}
 
 .project-meta {
   display: flex;

@@ -64,8 +64,12 @@ test('GET / renders Chinese login page when locale cookie is zh-CN', async () =>
 test('GET /assets/styles.css keeps login background visible above page background', async () => {
   const res = await request(app()).get('/assets/styles.css');
   assert.equal(res.status, 200);
+  assert.match(res.text, /--accent:\s*#0b6bcb;/);
+  assert.match(res.text, /--accent-dark:\s*#074f96;/);
+  assert.match(res.text, /railway|freight|container/i);
   assert.match(res.text, /\.login-background\s*\{[\s\S]*z-index:\s*0;/);
   assert.match(res.text, /\.login-panel\s*\{[\s\S]*z-index:\s*1;/);
+  assert.match(res.text, /\.login-panel\s*\{[\s\S]*border-top:\s*4px solid var\(--accent\);/);
 });
 
 test('POST /login renders localized wrong credential message', async () => {
