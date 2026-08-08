@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { projects } = require('../src/projects');
+const { localizeProject } = require('../src/i18n');
 
 test('default project navigation includes LearnDesk', () => {
   const learndesk = projects.find((project) => project.id === 'learndesk');
@@ -38,4 +39,11 @@ test('default project navigation replaces rates with factsheet entry', () => {
   assert.ok(factsheet);
   assert.equal(factsheet.path, '/factsheet');
   assert.equal(factsheet.healthUrl, 'http://factsheet_app:3000/health');
+});
+
+test('factsheet has Chinese portal label and description', () => {
+  const factsheet = projects.find((project) => project.id === 'factsheet');
+  const localized = localizeProject(factsheet, 'zh-CN');
+  assert.equal(localized.name, '事实表');
+  assert.equal(localized.description, '事实表项目入口。');
 });
