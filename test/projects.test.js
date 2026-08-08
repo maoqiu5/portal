@@ -30,3 +30,12 @@ test('default project navigation includes overseas rail cost module', () => {
   assert.equal(railCost.name, '境外段铁路成本');
   assert.equal(railCost.path, '/rail-cost');
 });
+
+test('default project navigation replaces rates with factsheet entry', () => {
+  const rates = projects.find((project) => project.id === 'rates');
+  const factsheet = projects.find((project) => project.id === 'factsheet');
+  assert.equal(rates, undefined);
+  assert.ok(factsheet);
+  assert.equal(factsheet.path, '/factsheet');
+  assert.equal(factsheet.healthUrl, 'http://factsheet_app:3000/health');
+});

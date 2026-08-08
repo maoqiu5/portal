@@ -31,7 +31,7 @@ const DEFAULT_PROJECT_IDS = [
   'yanqing',
   'maildesk',
   'gps',
-  'rates',
+  'factsheet',
   'rail-cost',
   'learndesk',
   'nas',
