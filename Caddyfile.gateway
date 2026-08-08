@@ -13,6 +13,10 @@
 		reverse_proxy portal_frontend:3000
 	}
 
+	handle /locale {
+		reverse_proxy portal_frontend:3000
+	}
+
 	handle /logout {
 		reverse_proxy portal_frontend:3000
 	}
@@ -51,6 +55,7 @@
 	handle /gps/api/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /gps
 		reverse_proxy 172.19.0.1:8015
@@ -59,6 +64,7 @@
 	route /gps/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check?redirect=1
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /gps
 		root * /srv/gps
@@ -76,6 +82,7 @@
 	handle /rates/api/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /rates
 		reverse_proxy 172.19.0.1:8025
@@ -84,6 +91,7 @@
 	route /rates/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check?redirect=1
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /rates
 		root * /srv/rates
@@ -94,6 +102,7 @@
 	route /usstock/api/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /usstock/api
 		reverse_proxy usstock_backend:8000 {
@@ -104,6 +113,7 @@
 	route /usstock* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check?redirect=1
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		reverse_proxy usstock_frontend:3000
 	}
@@ -111,6 +121,7 @@
 	route /maildesk/api/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /maildesk/api
 		reverse_proxy maildesk_backend:8000 {
@@ -123,6 +134,7 @@
 	route /maildesk/wps-browser/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check?redirect=1
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /maildesk/wps-browser
 		reverse_proxy 172.19.0.1:6080
@@ -131,6 +143,7 @@
 	route /maildesk* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check?redirect=1
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		reverse_proxy maildesk_frontend:3000
 	}
@@ -140,6 +153,7 @@
 	route /translator/api/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /translator
 		reverse_proxy translator_app:3000
@@ -148,6 +162,7 @@
 	route /translator* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check?redirect=1
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /translator
 		reverse_proxy translator_app:3000
@@ -156,6 +171,7 @@
 	route /cnstock/api/* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		uri strip_prefix /cnstock/api
 		reverse_proxy cnstock_backend:8000 {
@@ -166,6 +182,7 @@
 	route /cnstock* {
 		forward_auth portal_frontend:3000 {
 			uri /auth/check?redirect=1
+			copy_headers X-BrianHub-User X-BrianHub-Locale
 		}
 		reverse_proxy cnstock_frontend:3000
 	}
