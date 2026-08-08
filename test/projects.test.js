@@ -44,6 +44,6 @@ test('default project navigation replaces rates with factsheet entry', () => {
 test('factsheet has Chinese portal label and description', () => {
   const factsheet = projects.find((project) => project.id === 'factsheet');
   const localized = localizeProject(factsheet, 'zh-CN');
-  assert.equal(localized.name, '事实表');
+  assert.equal(localized.name, '中欧班列铁路运价');
   assert.equal(localized.description, '事实表项目入口。');
 });
