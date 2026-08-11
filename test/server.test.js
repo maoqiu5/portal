@@ -418,6 +418,7 @@ test('auth check and logout routes keep expected behavior', async () => {
   assert.equal(check.status, 204);
   assert.equal(check.headers['x-brianhub-user'], 'brian');
   assert.equal(check.headers['x-brianhub-locale'], 'en-US');
+  assert.equal(check.headers['x-brianhub-role'], 'admin');
   const logout = await agent.post('/logout');
   assert.equal(logout.status, 302);
   assert.match(logout.headers['set-cookie'].join('\n'), /brianhub_session=;/);

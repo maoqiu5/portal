@@ -207,6 +207,7 @@ function createApp(config = {}) {
     }
     res.set('X-BrianHub-User', user.username);
     res.set('X-BrianHub-Locale', currentLocale(req, user));
+    res.set('X-BrianHub-Role', user.role);
     res.status(204).end();
   });
 
